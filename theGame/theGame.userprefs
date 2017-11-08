@@ -1,12 +1,12 @@
 ﻿<Properties StartupConfiguration="{1BDB29A4-B634-4F30-8AC1-3F4BCCA60CE2}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Server/Packet.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Client/Client.cs">
     <Files>
-      <File FileName="Client/Client.cs" Line="79" Column="57" />
+      <File FileName="Client/Client.cs" Line="76" Column="11" />
       <File FileName="Server/ClientData.cs" Line="34" Column="6" />
       <File FileName="Server/ConnectionType.cs" Line="14" Column="60" />
-      <File FileName="Server/Server.cs" Line="80" Column="13" />
+      <File FileName="Server/Server.cs" Line="167" Column="40" />
       <File FileName="Server/ServerConstants.cs" Line="11" Column="1" />
-      <File FileName="Server/Packet.cs" Line="2" Column="4" />
+      <File FileName="Server/Packet.cs" Line="30" Column="9" />
       <File FileName="Client/packages.config" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
