@@ -83,6 +83,8 @@ namespace Server
 
             if(receivedPacket.OpType == "register") {
                 handleRegisterRequest(receivedPacket, senderSocket);
+            } else if (receivedPacket.OpType == "send") {
+                handleSendRequest(receivedPacket);
             }
            
 
@@ -113,7 +115,7 @@ namespace Server
         {
             String connectionType = packet.Arguments["Sender"];
 
-            if (connectionType == "client")
+            if (connectionType == "agent")
             {
                 int allocatedId = MainServer.currentAvailableIdForPlayers++;
 
@@ -127,9 +129,8 @@ namespace Server
                 }
 
                 sendIdToClient(senderSocket, allocatedId);
-
-
             }
+
             else if (connectionType == "gamemaster")
             {
                 int allocatedId = 0;
@@ -152,10 +153,47 @@ namespace Server
             }
         }
 
+        private static int getIndexOfDestinationInClients(int destinationId) {
+            for (int i = 0; i < _myClients.Count; i++) {
+                if(_myClients[i].GetId() == destinationId) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+
+
         private static void handleSendRequest(Packet packet)
         {
+            int destinationId = packet.DestinationId;
+
+            int destinationClientIndex = getIndexOfDestinationInClients(destinationId);
+
+            if(destinationClientIndex != -1) {
+                Socket destinationSocket = _myClients[destinationClientIndex].GetSocket();
+                forwardToClient(packet, destinationSocket);
+
+            } else {
+                // Log or something
+            }
 
         }
+
+
+        private static void forwardToClient(Packet packet, Socket socket){
+            String jsonString = JsonConvert.SerializeObject(packet);
+
+            byte[] send = Encoding.ASCII.GetBytes(jsonString);
+
+            socket.BeginSend(send, 0, send.Length, SocketFlags.None, new AsyncCallback(EndSend), socket);
+            // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
+
+            socket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), socket);
+            // Begin receiveng again on the same socket
+
+        }
+
 
         private static void sendIdToClient(Socket senderSocket, int allocatedId)
         {
