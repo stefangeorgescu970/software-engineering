@@ -12,7 +12,7 @@ namespace Client
         
 
         private static Socket _mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        private int _id;
+        private int _id = -1;
         private bool _isConnected;
 
         public Client(){

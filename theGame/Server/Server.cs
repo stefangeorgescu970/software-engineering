@@ -9,7 +9,7 @@ namespace Server
 {
     class MainServer
     {
-        private int currentAvailableIdForPlayers = 1;
+        private static int currentAvailableIdForPlayers = 1;
 
 
         private static byte[] _buffer = new byte[2048];
@@ -46,7 +46,6 @@ namespace Server
             ClientData newClient = new ClientData(newSocket);
             // Create new cliend data entity for further reference
 
-            _clientSockets.Add(newSocket);
             _myClients.Add(newClient);
 
             Console.WriteLine("Client Connected!");
@@ -60,17 +59,17 @@ namespace Server
             // We begin accepting again.
         }
 
-
         private static void ReceiveMessage(IAsyncResult asyncResult) {
             //TODO handle register requests and sending messages
-            // How? Messages "player" and "gameMaster" will signify registering to 
-            // server, gm gets id0, player gets first id avaialbe. Change the state
+            // How? Messages "player" and "gamemaster" will signify registering to 
+            // server, gm gets id 0, player gets first id avaialbe. Change the state
             // Of the two clients here and their ids, for further use in coms.
 
             Socket senderSocket = (Socket)asyncResult.AsyncState; 
             // passed as argument to begin receive, so we know who send the message
 
             int sizeOfReceivedData = senderSocket.EndReceive(asyncResult);
+
             byte[] temporaryBuffer = new byte[sizeOfReceivedData];
             Array.Copy(_buffer, temporaryBuffer, sizeOfReceivedData);
             // Truncate the data so we do not deal with unnecessary null cells.
@@ -79,15 +78,13 @@ namespace Server
 
             Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(receivedData);
 
-
-
             Console.WriteLine("I got: " + receivedData);
             // Here do something given the data received. Now just send back response and probably wrap this in a function in the future
 
-
-            byte[] toSend = Encoding.ASCII.GetBytes("Here is your response.");
-            senderSocket.BeginSend(toSend, 0, toSend.Length, SocketFlags.None, new AsyncCallback(EndSend), senderSocket);
-            // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
+            if(receivedPacket.OpType == "register") {
+                handleRegisterRequest(receivedPacket, senderSocket);
+            }
+           
 
             senderSocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), senderSocket);
             // Begin receiveng again on the same socket
@@ -110,6 +107,73 @@ namespace Server
 
             // Start server and keep console running
         }
+
+
+        private static void handleRegisterRequest(Packet packet, Socket senderSocket)
+        {
+            String connectionType = packet.Arguments["Sender"];
+
+            if (connectionType == "client")
+            {
+                int allocatedId = MainServer.currentAvailableIdForPlayers++;
+
+                foreach (var clientData in _myClients)
+                {
+                    if (clientData.GetSocket() == senderSocket)
+                    {
+                        clientData.SetId(allocatedId);
+                        break;
+                    }
+                }
+
+                sendIdToClient(senderSocket, allocatedId);
+
+
+            }
+            else if (connectionType == "gamemaster")
+            {
+                int allocatedId = 0;
+
+                foreach (var clientData in _myClients)
+                {
+                    if (clientData.GetSocket() == senderSocket)
+                    {
+                        clientData.SetId(allocatedId);
+                        break;
+                    }
+                }
+
+                sendIdToClient(senderSocket, allocatedId);
+
+            }
+            else
+            {
+                Console.WriteLine("Invalid request received, do nothing.");
+            }
+        }
+
+        private static void handleSendRequest(Packet packet)
+        {
+
+        }
+
+        private static void sendIdToClient(Socket senderSocket, int allocatedId)
+        {
+            Packet toSend = new Packet(-1, allocatedId, "register");
+            toSend.addArgument("Id", allocatedId.ToString());
+
+            String jsonString = JsonConvert.SerializeObject(toSend);
+
+            byte[] send = Encoding.ASCII.GetBytes(jsonString);
+
+            senderSocket.BeginSend(send, 0, send.Length, SocketFlags.None, new AsyncCallback(EndSend), senderSocket);
+            // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
+
+            senderSocket.BeginReceive(_buffer, 0, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), senderSocket);
+            // Begin receiveng again on the same socket
+
+        }
+
 
     }
 }
