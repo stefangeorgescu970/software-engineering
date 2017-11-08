@@ -2,6 +2,8 @@
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using Newtonsoft.Json;
+using Server;
 
 namespace Client
 {
@@ -11,12 +13,13 @@ namespace Client
 
         private static Socket _mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private int _id;
-
+        private bool _isConnected;
 
         public Client(){
             TryConnect(5);
             if(!_mySocket.Connected) {
                 //TODO handle case when the client does not manage to esablish connection to server
+                _isConnected = false;
             }
 
         }
@@ -25,12 +28,6 @@ namespace Client
             _id = id;
         }
 
-        public void SendMessage(String message){
-            byte[] toSend = Encoding.ASCII.GetBytes(message);
-            _mySocket.Send(toSend);
-        }
-
-
         private void TryConnect(int maximumAttempts) {
             int attempts = 0;
             while (!_mySocket.Connected && attempts < maximumAttempts){
@@ -38,6 +35,7 @@ namespace Client
                     System.Threading.Thread.Sleep(2000);
                     attempts++;
                     _mySocket.Connect(IPAddress.Loopback, 8080);
+                    _isConnected = true;
                 }
                 catch (SocketException){
                     Console.Clear();
@@ -45,41 +43,59 @@ namespace Client
                 }
             }
             Console.Clear();
-            Console.WriteLine("Connected");
+            if(_isConnected)
+                Console.WriteLine("Connected");
         }
 
-        private void RegisterToServerAndGetId(String whoAmI){
-            SendMessage(whoAmI);
+        public String SendMessage(Packet myPacket, bool needResponse)
+        {
+            if (_isConnected){
+                String jsonString = JsonConvert.SerializeObject(myPacket);
 
-            byte[] receivedBuffer = new byte[2048];
-            int sizeReceived = _mySocket.Receive(receivedBuffer);
+                byte[] toSend = Encoding.ASCII.GetBytes(jsonString);
 
-            byte[] actualData = new byte[sizeReceived];
-            Array.Copy(receivedBuffer, actualData, sizeReceived);
+                _mySocket.Send(toSend);
 
-            Console.WriteLine("Received: " + Encoding.ASCII.GetString(actualData));
+                if(needResponse){
+                    byte[] receivedBuffer = new byte[2048];
+                    int sizeReceived = _mySocket.Receive(receivedBuffer);
+                    byte[] actualData = new byte[sizeReceived];
+                    Array.Copy(receivedBuffer, actualData, sizeReceived);
 
-            // TODO get id and save it. Game master should get id 0, players from 1 up.
-
+                    return Encoding.ASCII.GetString(actualData);
+                }
+            } else {
+                Console.WriteLine("Client with id " + _id + " is not connected to server");
+            }
+            return "";
         }
 
-        //TODO implement receive message
+
+        public void RegisterToServerAndGetId(String whoAmI){
+
+          
+
+            Packet toSend = new Packet(_id, -1, "register");
+
+            toSend.addArgument("Sender", whoAmI);
+           
+            String received = SendMessage(toSend, true);
+            // TODO parse received JSON? 
+
+            Console.WriteLine("Received: " + received);
+
+            // TODO get id and save it. Game master should get id 0, players from 1 up 
+        }
+
+        //TODO implement send message with  argument await response or not
 
         private void SendLoop(){
-            while(true) {
+            while (true)
+            {
                 Console.Write("Enter Message: ");
                 string text = Console.ReadLine();
 
-                byte[] toSend = Encoding.ASCII.GetBytes(text);
-                _mySocket.Send(toSend);
-
-                byte[] receivedBuffer = new byte[2048];
-                int sizeReceived = _mySocket.Receive(receivedBuffer);
-
-                byte[] actualData = new byte[sizeReceived];
-                Array.Copy(receivedBuffer, actualData, sizeReceived);
-
-                Console.WriteLine("Received: " + Encoding.ASCII.GetString(actualData));
+                RegisterToServerAndGetId(text);
             }
         }
 
@@ -89,7 +105,8 @@ namespace Client
         {
 
             Client myClient = new Client();
-            myClient.SendLoop();
+            Console.ReadLine();
+            myClient.RegisterToServerAndGetId("client");
             Console.ReadLine();
         }
     }

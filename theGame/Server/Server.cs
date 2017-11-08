@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Server
 {
@@ -32,6 +33,8 @@ namespace Server
 
             _serverSocket.BeginAccept(new AsyncCallback(AcceptConnection), null);
             // Accepting connections, with callback function AcceptConnection
+
+            Console.WriteLine("Awaiting connection...");
         }
 
         private static void AcceptConnection(IAsyncResult asyncResult){
@@ -73,6 +76,11 @@ namespace Server
             // Truncate the data so we do not deal with unnecessary null cells.
 
             string receivedData = Encoding.ASCII.GetString(temporaryBuffer);
+
+            Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(receivedData);
+
+
+
             Console.WriteLine("I got: " + receivedData);
             // Here do something given the data received. Now just send back response and probably wrap this in a function in the future
 
