@@ -7,37 +7,65 @@ namespace Client
 {
     class Client{
 
+        
+
         private static Socket _mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private int _id;
 
-        private static void loopConnect(){
+
+        public Client(){
+            TryConnect(5);
+            if(!_mySocket.Connected) {
+                //TODO handle case when the client does not manage to esablish connection to server
+            }
+
+        }
+
+        private void SetId(int id) {
+            _id = id;
+        }
+
+        public void SendMessage(String message){
+            byte[] toSend = Encoding.ASCII.GetBytes(message);
+            _mySocket.Send(toSend);
+        }
 
 
+        private void TryConnect(int maximumAttempts) {
             int attempts = 0;
-
-            while (!_mySocket.Connected){
-
+            while (!_mySocket.Connected && attempts < maximumAttempts){
                 try{
-                    
                     System.Threading.Thread.Sleep(2000);
                     attempts++;
                     _mySocket.Connect(IPAddress.Loopback, 8080);
-
-
                 }
-                catch (SocketException) {
+                catch (SocketException){
                     Console.Clear();
                     Console.WriteLine("Connection Attempts: " + attempts);
-
                 }
             }
-
             Console.Clear();
             Console.WriteLine("Connected");
         }
 
+        private void RegisterToServerAndGetId(String whoAmI){
+            SendMessage(whoAmI);
 
-        private static void sendLoop(){
+            byte[] receivedBuffer = new byte[2048];
+            int sizeReceived = _mySocket.Receive(receivedBuffer);
 
+            byte[] actualData = new byte[sizeReceived];
+            Array.Copy(receivedBuffer, actualData, sizeReceived);
+
+            Console.WriteLine("Received: " + Encoding.ASCII.GetString(actualData));
+
+            // TODO get id and save it. Game master should get id 0, players from 1 up.
+
+        }
+
+        //TODO implement receive message
+
+        private void SendLoop(){
             while(true) {
                 Console.Write("Enter Message: ");
                 string text = Console.ReadLine();
@@ -53,16 +81,15 @@ namespace Client
 
                 Console.WriteLine("Received: " + Encoding.ASCII.GetString(actualData));
             }
-
-
         }
+
+
 
         public static void Main(string[] args)
         {
-            loopConnect();
 
-            sendLoop();
-
+            Client myClient = new Client();
+            myClient.SendLoop();
             Console.ReadLine();
         }
     }

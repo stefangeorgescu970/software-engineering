@@ -1,8 +1,11 @@
-﻿<Properties StartupConfiguration="{C001B84F-0AD4-4A77-BC50-6376467CFC8C}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Server/Server.cs">
+﻿<Properties StartupConfiguration="{1BDB29A4-B634-4F30-8AC1-3F4BCCA60CE2}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Server/EmptyEnumeration.cs">
     <Files>
-      <File FileName="Server/ServerConstants.cs" Line="10" Column="1" />
-      <File FileName="Server/Server.cs" Line="68" Column="9" />
+      <File FileName="Client/Client.cs" Line="23" Column="34" />
+      <File FileName="Server/ServerConstants.cs" Line="9" Column="6" />
+      <File FileName="Server/Server.cs" Line="36" Column="10" />
+      <File FileName="Server/ClientData.cs" Line="4" Column="1" />
+      <File FileName="Server/EmptyEnumeration.cs" Line="4" Column="33" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
@@ -12,4 +15,5 @@
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.Client PreferredExecutionTarget="MonoDevelop.Default" />
 </Properties>
