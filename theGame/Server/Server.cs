@@ -10,7 +10,7 @@ namespace Server
     class MainServer
     {
         // TODO change this to singleton rather than using static fields.
-
+        // TODO add method that converts from packet to bytearray.
 
         /// <summary>
         /// The current available identifier for players.
@@ -90,10 +90,6 @@ namespace Server
         /// </summary>
         /// <param name="asyncResult">Async result.</param>
         private static void ReceiveMessage(IAsyncResult asyncResult) {
-            //TODO handle register requests and sending messages
-            // How? Messages "player" and "gamemaster" will signify registering to 
-            // server, gm gets id 0, player gets first id avaialbe. Change the state
-            // Of the two clients here and their ids, for further use in coms.
 
             Socket senderSocket = (Socket)asyncResult.AsyncState; 
             // passed as argument to begin receive, so we know who send the message
@@ -112,9 +108,9 @@ namespace Server
 
             // Handle the received packet.
             if(receivedPacket.RequestType == RequestType.REGISTER) {
-                handleRegisterRequest(receivedPacket, senderSocket);
+                HandleRegisterRequest(receivedPacket, senderSocket);
             } else if (receivedPacket.RequestType == RequestType.SEND) {
-                handleSendRequest(receivedPacket);
+                HandleSendRequest(receivedPacket);
             }
            
             senderSocket.BeginReceive(_buffer, ServerConstants.BufferOffset, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), senderSocket);
@@ -139,13 +135,13 @@ namespace Server
         /// </summary>
         /// <param name="packet">Packet.</param>
         /// <param name="senderSocket">Sender socket.</param>
-        private static void handleRegisterRequest(Packet packet, Socket senderSocket)
+        private static void HandleRegisterRequest(Packet packet, Socket senderSocket)
         {
             //  TODO clean this bit of ugly code
 
-            String clientType = packet.Arguments[ServerConstants.ArgumentNames.SenderType];
+            ClientType clientType = packet.Arguments[ServerConstants.ArgumentNames.SenderType];
 
-            if (clientType == "agent")
+            if (clientType == ClientType.AGENT)
             {
                 int allocatedId = MainServer._currentAvailableIdForPlayers++;
 
@@ -159,10 +155,10 @@ namespace Server
                     }
                 }
 
-                sendIdToClient(senderSocket, allocatedId);
+                SendIdToClient(senderSocket, allocatedId);
             }
 
-            else if (clientType == "gamemaster")
+            else if (clientType == ClientType.GAME_MASTER)
             {
                 int allocatedId = 0;
 
@@ -176,7 +172,7 @@ namespace Server
                     }
                 }
 
-                sendIdToClient(senderSocket, allocatedId);
+                SendIdToClient(senderSocket, allocatedId);
 
             }
             else
@@ -191,7 +187,7 @@ namespace Server
         /// </summary>
         /// <returns>The index of destination in clients.</returns>
         /// <param name="destinationId">Destination identifier.</param>
-        private static int getIndexOfDestinationInClients(int destinationId) {
+        private static int GetIndexOfDestinationInClients(int destinationId) {
 
             // TODO maybe find a more beautiful solution using container methods and closures.
 
@@ -208,15 +204,15 @@ namespace Server
         /// Handles the send request.
         /// </summary>
         /// <param name="packet">Packet.</param>
-        private static void handleSendRequest(Packet packet)
+        private static void HandleSendRequest(Packet packet)
         {
             int destinationId = packet.DestinationId;
 
-            int destinationClientIndex = getIndexOfDestinationInClients(destinationId);
+            int destinationClientIndex = GetIndexOfDestinationInClients(destinationId);
 
             if(destinationClientIndex != -1) {
                 Socket destinationSocket = _myClients[destinationClientIndex].Socket;
-                forwardToClient(packet, destinationSocket);
+                ForwardToClient(packet, destinationSocket);
 
             } else {
                 Console.WriteLine("Packet received, but destination not available.");
@@ -230,7 +226,7 @@ namespace Server
         /// </summary>
         /// <param name="packet">Packet.</param>
         /// <param name="socket">Socket.</param>
-        private static void forwardToClient(Packet packet, Socket socket){
+        private static void ForwardToClient(Packet packet, Socket socket){
             String jsonString = JsonConvert.SerializeObject(packet);
 
             byte[] send = Encoding.ASCII.GetBytes(jsonString);
@@ -249,7 +245,7 @@ namespace Server
         /// </summary>
         /// <param name="senderSocket">Sender socket.</param>
         /// <param name="allocatedId">Allocated identifier.</param>
-        private static void sendIdToClient(Socket senderSocket, int allocatedId)
+        private static void SendIdToClient(Socket senderSocket, int allocatedId)
         {
             Packet toSend = new Packet(-1, allocatedId, RequestType.SEND);
             toSend.AddArgument(ServerConstants.ArgumentNames.Id, allocatedId.ToString());

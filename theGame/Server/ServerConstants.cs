@@ -22,10 +22,19 @@ namespace Server
         /// </summary>
         public const int BufferSize = 2048;
 
+        /// <summary>
+        /// The first available player id.
+        /// </summary>
         public const int PlayerIdPoolStart = 1;
 
+        /// <summary>
+        /// The buffer offset.
+        /// </summary>
         public const int BufferOffset = 0;
 
+        /// <summary>
+        /// The maximum number of attemtps a client has to connect.
+        /// </summary>
         public const int MaximumNumberOfAttemtps = 5;
 
         /// <summary>
@@ -33,9 +42,17 @@ namespace Server
         /// </summary>
         public static class ArgumentNames {
 
+            /// <summary>
+            /// The identifier string used.
+            /// </summary>
             public const String Id = "Id";
 
+            /// <summary>
+            /// The type of the sender string used.
+            /// </summary>
             public const String SenderType = "SenderType";
+
+            // Those who implement agent and game master are free to add here whatever tags they will use.
 
         }
 

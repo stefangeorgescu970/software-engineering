@@ -40,9 +40,17 @@
   <ItemGroup>
     <Compile Include="Client.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ClientConstants.cs" />
     <Compile Include="..\Server\Packet.cs">
       <Link>Packet.cs</Link>
+    </Compile>
+    <Compile Include="..\Server\ServerConstants.cs">
+      <Link>ServerConstants.cs</Link>
+    </Compile>
+    <Compile Include="..\Server\RequestType.cs">
+      <Link>RequestType.cs</Link>
+    </Compile>
+    <Compile Include="..\Server\ClientType.cs">
+      <Link>ClientType.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
