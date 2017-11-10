@@ -44,6 +44,8 @@
     <Compile Include="ClientData.cs" />
     <Compile Include="ConnectionType.cs" />
     <Compile Include="Packet.cs" />
+    <Compile Include="RequestType.cs" />
+    <Compile Include="ClientType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
