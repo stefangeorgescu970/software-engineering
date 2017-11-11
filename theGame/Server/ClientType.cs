@@ -1,5 +1,4 @@
-﻿using System;
-namespace Server
+﻿namespace Server
 {
 
     /// <summary>
@@ -9,6 +8,6 @@ namespace Server
     /// </summary>
     public enum ClientType
     {
-        AGENT, GAME_MASTER
+        Agent, GameMaster
     }
 }

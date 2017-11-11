@@ -1,18 +1,1 @@
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Client/obj/x86/Debug/Client.csproj.CoreCompileInputs.cache
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Client/bin/Debug/Client.exe
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Client/bin/Debug/Client.pdb
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Client/obj/x86/Debug/Client.exe
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Client/obj/x86/Debug/Client.pdb
-<<<<<<< HEAD
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Client/bin/Debug/Newtonsoft.Json.dll
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Client/bin/Debug/Newtonsoft.Json.xml
-=======
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Client/bin/Debug/Client.exe.config
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Client/obj/x86/Debug/Client.exe
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Client/obj/x86/Debug/Client.pdb
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Client/obj/x86/Debug/Client.csprojResolveAssemblyReference.cache
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Client/bin/Debug/Client.exe
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Client/bin/Debug/Client.pdb
->>>>>>> master
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Client/bin/Debug/Client.exe.config
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Client/obj/x86/Debug/Client.csprojResolveAssemblyReference.cache
+C:\Users\odomi\Source\Repos\software-engineering\theGame\Client\obj\x86\Debug\Client.csprojResolveAssemblyReference.cache

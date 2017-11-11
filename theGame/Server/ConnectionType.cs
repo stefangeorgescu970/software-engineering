@@ -8,6 +8,6 @@
     /// </summary>
     public enum ConnectionType
     {
-        CONNECTED, PENDING_REQUEST, DISCONNECTED
+        Connected, PendingRequest, Disconnected
     }
 }
