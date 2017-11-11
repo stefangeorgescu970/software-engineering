@@ -35,7 +35,7 @@ namespace Server
         public ClientData(Socket socket){
             _mySocket = socket;
             _id = -1;
-            _myConnectionType = ConnectionType.PENDING_REQUEST;
+            _myConnectionType = ConnectionType.PendingRequest;
         }
 
 
