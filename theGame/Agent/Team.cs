@@ -1,31 +1,36 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Agent
 {
     class Team
     {
         List<Player> players;
-        Player _teamLeader;
+        Player teamLeader;
 
         public Team(List<Player> players)
         {
-	        foreach (Player t in players)
-	        {
-		        this.players.Add(t);
-		        t.SetTeam(this);
-	        }
+            for (int i = 0; i < players.Count; ++i)
+            {
+                this.players.Add(players[i]);
+                players[i].setTeam(this);
+            }
+                
         }
         public Team(List<Player> players, Player teamLeader)
         {
-	        foreach (Player t in players)
-	        {
-		        this.players.Add(t);
-		        t.SetTeam(this);
-	        }
-	        this._teamLeader = teamLeader;
+            for (int i = 0; i < players.Count; ++i)
+            {
+                this.players.Add(players[i]);
+                players[i].setTeam(this);
+            }
+            this.teamLeader = teamLeader;
         }
-        public void SetTeamLeader(Player teamLeader){
-            this._teamLeader = teamLeader;
+        public void setTeamLeader(Player teamLeader){
+            this.teamLeader = teamLeader;
         }
     }
 }

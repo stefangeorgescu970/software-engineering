@@ -20,19 +20,19 @@ namespace Server
         /// <summary>
         /// The buffer in which messages will arrive.
         /// </summary>
-        private static readonly byte[] _buffer = new byte[ServerConstants.BufferSize];
+        private static byte[] _buffer = new byte[ServerConstants.BufferSize];
 
 
         /// <summary>
         /// List of clients.
         /// </summary>
-        private static readonly List<ClientData> _myClients = new List<ClientData>(); // Updated list of clients to serve
+        private static List<ClientData> _myClients = new List<ClientData>(); // Updated list of clients to serve
 
 
         /// <summary>
         /// The server socket. Main communication end-point.
         /// </summary>
-        private static readonly Socket _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private static Socket _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
 
         /// <summary>
@@ -107,9 +107,9 @@ namespace Server
             Console.WriteLine("I got: " + receivedData);
 
             // Handle the received packet.
-            if(receivedPacket.RequestType == RequestType.Register) {
+            if(receivedPacket.RequestType == RequestType.REGISTER) {
                 HandleRegisterRequest(receivedPacket, senderSocket);
-            } else if (receivedPacket.RequestType == RequestType.Send) {
+            } else if (receivedPacket.RequestType == RequestType.SEND) {
                 HandleSendRequest(receivedPacket);
             }
            
@@ -141,16 +141,16 @@ namespace Server
 
             ClientType clientType = packet.Arguments[ServerConstants.ArgumentNames.SenderType];
 
-            if (clientType == ClientType.Agent)
+            if (clientType == ClientType.AGENT)
             {
-                int allocatedId = _currentAvailableIdForPlayers++;
+                int allocatedId = MainServer._currentAvailableIdForPlayers++;
 
                 foreach (var clientData in _myClients)
                 {
                     if (clientData.Socket == senderSocket)
                     {
                         clientData.Id = allocatedId;
-                        clientData.ConnectionType = ConnectionType.Connected;
+                        clientData.ConnectionType = ConnectionType.CONNECTED;
                         break;
                     }
                 }
@@ -158,7 +158,7 @@ namespace Server
                 SendIdToClient(senderSocket, allocatedId);
             }
 
-            else if (clientType == ClientType.GameMaster)
+            else if (clientType == ClientType.GAME_MASTER)
             {
                 int allocatedId = 0;
 
@@ -167,7 +167,7 @@ namespace Server
                     if (clientData.Socket == senderSocket)
                     {
                         clientData.Id = allocatedId;
-                        clientData.ConnectionType = ConnectionType.Connected;
+                        clientData.ConnectionType = ConnectionType.CONNECTED;
                         break;
                     }
                 }
@@ -247,7 +247,7 @@ namespace Server
         /// <param name="allocatedId">Allocated identifier.</param>
         private static void SendIdToClient(Socket senderSocket, int allocatedId)
         {
-            Packet toSend = new Packet(-1, allocatedId, RequestType.Send);
+            Packet toSend = new Packet(-1, allocatedId, RequestType.SEND);
             toSend.AddArgument(ServerConstants.ArgumentNames.Id, allocatedId.ToString());
 
             String jsonString = JsonConvert.SerializeObject(toSend);
