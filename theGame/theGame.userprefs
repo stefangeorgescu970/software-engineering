@@ -1,11 +1,7 @@
 ﻿<Properties StartupConfiguration="{1BDB29A4-B634-4F30-8AC1-3F4BCCA60CE2}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Server/EmptyEnumeration.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Client/Client.cs">
     <Files>
-      <File FileName="Client/Client.cs" Line="23" Column="34" />
-      <File FileName="Server/ServerConstants.cs" Line="9" Column="6" />
-      <File FileName="Server/Server.cs" Line="36" Column="10" />
-      <File FileName="Server/ClientData.cs" Line="4" Column="1" />
-      <File FileName="Server/EmptyEnumeration.cs" Line="4" Column="33" />
+      <File FileName="Client/Client.cs" Line="20" Column="65" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />

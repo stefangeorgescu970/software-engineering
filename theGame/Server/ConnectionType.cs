@@ -1,15 +1,13 @@
-﻿using System;
-namespace Server
+﻿namespace Server
 {
+    /// <summary>
+    /// Connection type.
+    /// CONNECTED - connection has been established with the server and server has allocated id for entity.
+    /// PENDING-REQUEST socket connection has been established, request to join has not yet been forwarded.
+    /// DISCONNECTED - entity with which connection has been lost.
+    /// </summary>
     public enum ConnectionType
     {
-        CONNECTED, PENDING_REQUEST, DISCONNECTED
+        Connected, PendingRequest, Disconnected
     }
-
-
-    /*
-     * A Connected entity is one that has established communication with the server.
-     * A Pending_Request entity is one that has a socket connection, but has not yet forwarded a request to join the game.
-     * A Disconnected entity is one that was previously connected but stopped responding on the socket. 
-     */ 
 }

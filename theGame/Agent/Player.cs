@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Agent
 {
     class Player
     {
-        Tuple<int, int> position;
-        Team myTeam;
+	    readonly Tuple<int, int> position;
+        Team _myTeam;
         public Player(int i, int j)
         {
             position = new Tuple<int, int>(i, j);
-            myTeam = null;
+            _myTeam = null;
         }
-        public void setTeam(Team myTeam)
+        public void SetTeam(Team myTeam)
         {
-            this.myTeam = myTeam;
+            this._myTeam = myTeam;
         }
 
 
