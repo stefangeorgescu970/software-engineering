@@ -1,18 +1,6 @@
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Server/bin/Debug/Server.exe
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Server/bin/Debug/Server.pdb
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Server/obj/x86/Debug/Server.csproj.CoreCompileInputs.cache
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Server/obj/x86/Debug/Server.exe
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Server/obj/x86/Debug/Server.pdb
-<<<<<<< HEAD
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Server/bin/Debug/Newtonsoft.Json.dll
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Server/bin/Debug/Newtonsoft.Json.xml
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Server/obj/x86/Debug/Server.csprojResolveAssemblyReference.cache
-=======
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Server/bin/Debug/Server.exe.config
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Server/obj/x86/Debug/Server.exe
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Server/obj/x86/Debug/Server.pdb
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Server/bin/Debug/Server.exe
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Server/bin/Debug/Server.pdb
-C:/Users/Habbab/Documents/GitHub/software-engineering/theGame/Server/obj/x86/Debug/Server.csprojResolveAssemblyReference.cache
->>>>>>> master
-/Users/Stefan/Documents/Facultate/myUniCode/Anul_2/Semestru_1/software-engineering/theGame/Server/bin/Debug/Server.exe.config
+C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\bin\Debug\Server.exe.config
+C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\bin\Debug\Server.exe
+C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\bin\Debug\Server.pdb
+C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\bin\Debug\Newtonsoft.Json.dll
+C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\obj\x86\Debug\Server.exe
+C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\obj\x86\Debug\Server.pdb

@@ -10,12 +10,12 @@ namespace Client
     abstract class Client
     {
 
-        private static Socket _mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private static readonly Socket _mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         private int _id = -1;
         private bool _isConnected;
-        private static byte[] _buffer = new byte[ServerConstants.BufferSize];
+        private static readonly byte[] _buffer = new byte[ServerConstants.BufferSize];
 
-        public Client()
+	    protected Client()
         {
             TryConnect(ServerConstants.MaximumNumberOfAttemtps);
             if (!_mySocket.Connected)
@@ -41,7 +41,7 @@ namespace Client
                     attempts++;
                     _mySocket.Connect(IPAddress.Loopback, ServerConstants.UsedPort);
                     _isConnected = true;
-                    _mySocket.BeginReceive(_buffer, ServerConstants.BufferOffset, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), _mySocket);
+                    _mySocket.BeginReceive(_buffer, ServerConstants.BufferOffset, _buffer.Length, SocketFlags.None, ReceiveMessage, _mySocket);
                     // Listen for messages, which will go to buffer
 
                 }
@@ -117,7 +117,7 @@ namespace Client
 
         public void RegisterToServerAndGetId(ClientType whoAmI)
         {
-            Packet toSend = new Packet(_id, -1, RequestType.REGISTER);
+            Packet toSend = new Packet(_id, -1, RequestType.Register);
 
             toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, whoAmI);
 
@@ -129,9 +129,9 @@ namespace Client
 
             int receivedId = Int32.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]);
 
-            this.SetId(receivedId);
+            SetId(receivedId);
         }
 
-        abstract public void HandleReceivePacket(Packet ReceivedPacket);
+        public abstract void HandleReceivePacket(Packet receivedPacket);
     }
 }

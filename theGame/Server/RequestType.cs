@@ -1,5 +1,4 @@
-﻿using System;
-namespace Server
+﻿namespace Server
 {
 
     /// <summary>
@@ -9,7 +8,7 @@ namespace Server
     /// </summary>
     public enum RequestType
     {
-        REGISTER, SEND
+        Register, Send
 
     }
 }
