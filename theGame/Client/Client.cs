@@ -30,6 +30,11 @@ namespace Client
             _id = id;
         }
 
+        public int GetId()
+        {
+            return _id;
+        }
+
         private void TryConnect(int maximumAttempts)
         {
             int attempts = 0;

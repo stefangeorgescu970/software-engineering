@@ -14,11 +14,12 @@ namespace Launcher
         public GameMaster()
         {
             RegisterToServerAndGetId(ClientType.GameMaster);
+            Console.WriteLine(GetId());
         }
 
         public override void HandleReceivePacket(Packet receivedPacket)
         {
-            //Console.WriteLine(receivedPacket.RequestType);
+            Console.WriteLine(receivedPacket.RequestType);            
         }
     }
 }
