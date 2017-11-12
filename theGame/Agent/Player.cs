@@ -30,8 +30,13 @@ namespace Agent
                 int idx = r.Next(4);
                 int newX = position.Item1 + dx[idx];
                 int newY = position.Item2 + dy[idx];
-                if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10/* && (newX, newY) are not ocupied */ )   // 10 should subtituted by the board size
+                if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10/* && (newX, newY) are not ocupied */ ) // 10 should subtituted by the board size
+                {
+                    position = new Tuple<int, int>(newX, newY);
+
                     return new Tuple<int, int>(newX, newY);
+                }
+
             }
         }
 
