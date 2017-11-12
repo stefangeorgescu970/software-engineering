@@ -1,14 +1,16 @@
-﻿namespace Agent
+﻿using System;
+using System.Collections.Generic;
+
+namespace Agent
 {
     class Program
     {
         static void Main(string[] args)
         {
-            List<int> a = new List<int>();
-            a.Add(1);
-            a.Add(2);
-            a.Add(3);
-           
+            var players = new List<Player> {new Player(1, 1)};
+            var team = new Team(players);
+            team.MoveAllPlayers();
+            Console.ReadKey();
         }
     }
 }

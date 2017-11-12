@@ -1,13 +1,16 @@
 ﻿using System;
+using Server;
 
 namespace Agent
 {
-    class Player
+    class Player : global::Client.Client
     {
-	    readonly Tuple<int, int> position;
+	    Tuple<int, int> position;
         Team _myTeam;
         public Player(int i, int j)
         {
+            TryConnect(5);
+            //RegisterToServerAndGetId(ClientType.Agent);
             position = new Tuple<int, int>(i, j);
             _myTeam = null;
         }
@@ -41,5 +44,9 @@ namespace Agent
         }
 
 
+        public override void HandleReceivePacket(Packet receivedPacket)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -7,7 +7,7 @@ using Server;
 
 namespace Client
 {
-    abstract class Client
+    public abstract class Client
     {
 
         private static readonly Socket _mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -30,7 +30,7 @@ namespace Client
             _id = id;
         }
 
-        private void TryConnect(int maximumAttempts)
+        public void TryConnect(int maximumAttempts)
         {
             int attempts = 0;
             while (!_mySocket.Connected && attempts < maximumAttempts)
