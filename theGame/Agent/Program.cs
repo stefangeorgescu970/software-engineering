@@ -7,7 +7,7 @@ namespace Agent
     {
         static void Main(string[] args)
         {
-            var players = new List<Player> {new Player(1, 1)};
+            var players = new List<Player> {new Player(i: int.Parse(args[0]), j: int.Parse(args[0])) };
             var team = new Team(players);
             team.MoveAllPlayers();
             Console.ReadKey();

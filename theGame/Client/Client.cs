@@ -11,7 +11,7 @@ namespace Client
     {
 
         private static readonly Socket _mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        private int _id = -1;
+        protected int _id = -1;
         private bool _isConnected;
         private static readonly byte[] _buffer = new byte[ServerConstants.BufferSize];
 

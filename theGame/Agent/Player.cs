@@ -3,16 +3,17 @@ using Server;
 
 namespace Agent
 {
-    class Player : global::Client.Client
+    public class Player : global::Client.Client
     {
 	    Tuple<int, int> position;
-        Team _myTeam;
+        public Team _myTeam;
         public Player(int i, int j)
         {
-            TryConnect(5);
             //RegisterToServerAndGetId(ClientType.Agent);
+            TryConnect(5);
             position = new Tuple<int, int>(i, j);
             _myTeam = null;
+            Console.WriteLine($"Player with id: {_id}, initialized on location x: {i} y: {j}");
         }
         public void SetTeam(Team myTeam)
         {

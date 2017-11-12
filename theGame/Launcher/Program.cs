@@ -1,12 +1,14 @@
 ﻿using Board;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Mime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Agent;
 
 namespace Launcher
 {
@@ -52,6 +54,7 @@ namespace Launcher
 					Console.WriteLine("Launching client");
 					// Use of dispatcher necessary as this is a cross-thread operation
 					DispatchToApp(() => new MainWindow(numberOfPlayers,goalAreaWidth, goalAreaHeight, boardWidth, boardHeight).Show());
+				    GeneratePlayers(numberOfPlayers, goalAreaHeight);
 				}
 				// Press 2 to exit
 				if (key == ConsoleKey.Escape)
@@ -65,7 +68,26 @@ namespace Launcher
 			Console.ReadKey();
 		}
 
-		static void DispatchToApp(Action action)
+	    private static void GeneratePlayers(int numberOfPlayers, int goalAreaHeight)
+	    {
+	        for (; numberOfPlayers > 0; numberOfPlayers--)
+	        {
+	            var p = new Process
+	            {
+	                StartInfo =
+	                {
+	                    Arguments = String.Concat($"{numberOfPlayers}", $"{goalAreaHeight}"),
+	                    FileName = @"..\..\..\Agent\bin\Debug\Agent.exe",
+                        CreateNoWindow = true,
+	                    UseShellExecute = true
+	                }
+	            };
+	            p.Start();
+	        }
+	    }
+
+
+	    static void DispatchToApp(Action action)
 		{
 			_app.Dispatcher.Invoke(action);
 		}

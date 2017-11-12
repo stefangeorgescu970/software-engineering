@@ -26,9 +26,9 @@ namespace Board
 
 			InitializeComponent();
 			CreateBoard(BoardWidth, BoardHeight);
-			
 		}
-		private void CreateBoard(int width, int height)
+
+	    private void CreateBoard(int width, int height)
 		{
 			Grid boardGrid = new Grid
 			{

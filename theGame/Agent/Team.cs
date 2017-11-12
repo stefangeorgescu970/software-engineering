@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Agent
 {
-    class Team
+    public class Team
     {
         List<Player> _players;
         Player _teamLeader;

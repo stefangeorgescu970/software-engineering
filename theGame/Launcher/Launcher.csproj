@@ -55,6 +55,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Agent\Agent.csproj">
+      <Project>{879238d8-f989-46b4-b589-b94dbd9c0e93}</Project>
+      <Name>Agent</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Board\Board.csproj">
       <Project>{8B6544C9-4BC0-4F7E-8229-FA86B23C2590}</Project>
       <Name>Board</Name>
