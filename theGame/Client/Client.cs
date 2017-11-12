@@ -7,7 +7,7 @@ using Server;
 
 namespace Client
 {
-    abstract class Client
+    public abstract class Client
     {
 
         private static readonly Socket _mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -15,7 +15,7 @@ namespace Client
         private bool _isConnected;
         private static readonly byte[] _buffer = new byte[ServerConstants.BufferSize];
 
-	    protected Client()
+	    public Client()
         {
             TryConnect(ServerConstants.MaximumNumberOfAttemtps);
             if (!_mySocket.Connected)

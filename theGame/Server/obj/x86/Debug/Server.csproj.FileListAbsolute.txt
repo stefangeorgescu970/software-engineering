@@ -4,3 +4,11 @@ C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\bin\Debug\Server
 C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\bin\Debug\Newtonsoft.Json.dll
 C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\obj\x86\Debug\Server.exe
 C:\Users\odomi\Source\Repos\software-engineering\theGame\Server\obj\x86\Debug\Server.pdb
+C:\Users\abcd\Source\Repos\software-engineering\theGame\Server\bin\Debug\Server.exe.config
+C:\Users\abcd\Source\Repos\software-engineering\theGame\Server\bin\Debug\Server.exe
+C:\Users\abcd\Source\Repos\software-engineering\theGame\Server\bin\Debug\Server.pdb
+C:\Users\abcd\Source\Repos\software-engineering\theGame\Server\bin\Debug\Newtonsoft.Json.dll
+C:\Users\abcd\Source\Repos\software-engineering\theGame\Server\obj\x86\Debug\Server.csprojResolveAssemblyReference.cache
+C:\Users\abcd\Source\Repos\software-engineering\theGame\Server\obj\x86\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\abcd\Source\Repos\software-engineering\theGame\Server\obj\x86\Debug\Server.exe
+C:\Users\abcd\Source\Repos\software-engineering\theGame\Server\obj\x86\Debug\Server.pdb

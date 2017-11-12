@@ -139,7 +139,7 @@ namespace Server
         {
             //  TODO clean this bit of ugly code
 
-            ClientType clientType = packet.Arguments[ServerConstants.ArgumentNames.SenderType];
+            ClientType clientType = (ClientType)packet.Arguments[ServerConstants.ArgumentNames.SenderType];
 
             if (clientType == ClientType.Agent)
             {

@@ -1,4 +1,7 @@
-﻿using Board;
+﻿#define DEFAULT_PARAMS
+
+using Board;
+using Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,22 +18,33 @@ namespace Launcher
 		static Application _app;
 		static void Main()
 		{
-			Console.WriteLine("Number of players:");
-			int numberOfPlayers = Convert.ToInt32(Console.ReadLine());
 
-			Console.WriteLine("Goal area width:");
-			int goalAreaWidth = Convert.ToInt32(Console.ReadLine());
+#if (DEFAULT_PARAMS)
 
-			Console.WriteLine("Goal area height:");
-			int goalAreaHeight = Convert.ToInt32(Console.ReadLine());
+            int numberOfPlayers = 2;
+            int goalAreaWidth = 20;
+            int goalAreaHeight = 10;
+            int boardWidth = 40;
+            int boardHeight = 40;
 
-			Console.WriteLine("Board width:");
-			int boardWidth = Convert.ToInt32(Console.ReadLine());
+#else
+            Console.WriteLine("Number of players:");
+            int numberOfPlayers = Convert.ToInt32(Console.ReadLine());
 
-			Console.WriteLine("Board height:");
-			int boardHeight = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine("Goal area width:");
+            int goalAreaWidth = Convert.ToInt32(Console.ReadLine());
 
-			Console.WriteLine("Press \"Enter\" to start client, \"Esc\" to close it" );
+            Console.WriteLine("Goal area height:");
+            int goalAreaHeight = Convert.ToInt32(Console.ReadLine());
+
+            Console.WriteLine("Board width:");
+            int boardWidth = Convert.ToInt32(Console.ReadLine());
+
+            Console.WriteLine("Board height:");
+            int boardHeight = Convert.ToInt32(Console.ReadLine());
+#endif
+
+            Console.WriteLine("Press \"Enter\" to start client, \"Esc\" to close it" );
 			var appthread = new Thread(new ThreadStart(() =>
 			{
 				_app = new Application()
@@ -42,6 +56,9 @@ namespace Launcher
 			}));
 			appthread.SetApartmentState(ApartmentState.STA);
 			appthread.Start();
+
+            // Start GameMaster
+            GameMaster gameMaster = new GameMaster();
 
 			while (true)
 			{
