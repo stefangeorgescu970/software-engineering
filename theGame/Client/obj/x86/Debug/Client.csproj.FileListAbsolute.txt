@@ -1,9 +1,0 @@
-C:\Users\odomi\Source\Repos\software-engineering\theGame\Client\obj\x86\Debug\Client.csprojResolveAssemblyReference.cache
-C:\Users\domin_000\SharedProjects\software-engineering\theGame\Client\obj\x86\Debug\Client.csprojResolveAssemblyReference.cache
-C:\Users\domin_000\SharedProjects\software-engineering\theGame\Client\obj\x86\Debug\Client.csproj.CoreCompileInputs.cache
-C:\Users\domin_000\SharedProjects\software-engineering\theGame\Client\bin\Debug\Client.dll.config
-C:\Users\domin_000\SharedProjects\software-engineering\theGame\Client\bin\Debug\Client.dll
-C:\Users\domin_000\SharedProjects\software-engineering\theGame\Client\bin\Debug\Client.pdb
-C:\Users\domin_000\SharedProjects\software-engineering\theGame\Client\bin\Debug\Newtonsoft.Json.dll
-C:\Users\domin_000\SharedProjects\software-engineering\theGame\Client\obj\x86\Debug\Client.dll
-C:\Users\domin_000\SharedProjects\software-engineering\theGame\Client\obj\x86\Debug\Client.pdb
