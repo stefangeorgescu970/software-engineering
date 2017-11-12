@@ -9,8 +9,8 @@ namespace Agent
         public Team _myTeam;
         public Player(int i, int j)
         {
-            //RegisterToServerAndGetId(ClientType.Agent);
             TryConnect(5);
+            RegisterToServerAndGetId(ClientType.Agent);
             position = new Tuple<int, int>(i, j);
             _myTeam = null;
             Console.WriteLine($"Player with id: {_id}, initialized on location x: {i} y: {j}");
@@ -47,7 +47,7 @@ namespace Agent
 
         public override void HandleReceivePacket(Packet receivedPacket)
         {
-            throw new NotImplementedException();
+            SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
         }
     }
 }

@@ -139,45 +139,46 @@ namespace Server
         {
             //  TODO clean this bit of ugly code
 
-            ClientType clientType = packet.Arguments[ServerConstants.ArgumentNames.SenderType];
+            ClientType clientType = (ClientType)((int)packet.Arguments[ServerConstants.ArgumentNames.SenderType]);
 
-            if (clientType == ClientType.Agent)
+            switch (clientType)
             {
-                int allocatedId = _currentAvailableIdForPlayers++;
-
-                foreach (var clientData in _myClients)
+                case ClientType.Agent:
                 {
-                    if (clientData.Socket == senderSocket)
+                    int allocatedId = _currentAvailableIdForPlayers++;
+
+                    foreach (var clientData in _myClients)
                     {
+                        if (clientData.Socket != senderSocket) continue;
+
                         clientData.Id = allocatedId;
                         clientData.ConnectionType = ConnectionType.Connected;
                         break;
                     }
+
+                    SendIdToClient(senderSocket, allocatedId);
+                    break;
                 }
-
-                SendIdToClient(senderSocket, allocatedId);
-            }
-
-            else if (clientType == ClientType.GameMaster)
-            {
-                int allocatedId = 0;
-
-                foreach (var clientData in _myClients)
+                case ClientType.GameMaster:
                 {
-                    if (clientData.Socket == senderSocket)
+                    int allocatedId = 0;
+
+                    foreach (var clientData in _myClients)
                     {
+                        if (clientData.Socket != senderSocket) continue;
+
                         clientData.Id = allocatedId;
                         clientData.ConnectionType = ConnectionType.Connected;
                         break;
                     }
+
+                    SendIdToClient(senderSocket, allocatedId);
+
+                    break;
                 }
-
-                SendIdToClient(senderSocket, allocatedId);
-
-            }
-            else
-            {
-                Console.WriteLine("Invalid request received, do nothing.");
+                default:
+                    Console.WriteLine("Invalid request received, do nothing.");
+                    break;
             }
         }
 

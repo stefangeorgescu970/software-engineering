@@ -25,7 +25,7 @@ namespace Client
             }
         }
 
-        private void SetId(int id)
+        protected void SetId(int id)
         {
             _id = id;
         }
