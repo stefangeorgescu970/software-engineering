@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-namespace Board
+﻿namespace Board
 {
 	/// <summary>
 	/// Interaction logic for App.xaml

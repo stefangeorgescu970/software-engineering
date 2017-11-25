@@ -5,28 +5,31 @@ namespace Agent
 {
     public class Team
     {
-        List<Player> _players;
+        readonly List<Player> _players;
         Player _teamLeader;
 
         public Team(List<Player> players)
         {
-            this._players = players;
+            _players = players;
             foreach (var player in players)
-	        {
-		        player.SetTeam(this);
-	        }
+            {
+                player.SetTeam(this);
+            }
         }
+
         public Team(List<Player> players, Player teamLeader)
         {
-	        foreach (Player t in players)
-	        {
-		        this._players.Add(t);
-		        t.SetTeam(this);
-	        }
-	        this._teamLeader = teamLeader;
+            foreach (Player t in players)
+            {
+                _players.Add(t);
+                t.SetTeam(this);
+            }
+            _teamLeader = teamLeader;
         }
-        public void SetTeamLeader(Player teamLeader){
-            this._teamLeader = teamLeader;
+
+        public void SetTeamLeader(Player teamLeader)
+        {
+            _teamLeader = teamLeader;
         }
 
         public void MoveAllPlayers()

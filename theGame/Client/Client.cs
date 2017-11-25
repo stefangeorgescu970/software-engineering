@@ -10,15 +10,15 @@ namespace Client
     public abstract class Client
     {
 
-        private static readonly Socket _mySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        protected int _id = -1;
+        private static readonly Socket MySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        protected int Id = -1;
         private bool _isConnected;
-        private static readonly byte[] _buffer = new byte[ServerConstants.BufferSize];
+        private static readonly byte[] Buffer = new byte[ServerConstants.BufferSize];
 
 	    protected Client()
         {
             TryConnect(ServerConstants.MaximumNumberOfAttemtps);
-            if (!_mySocket.Connected)
+            if (!MySocket.Connected)
             {
                 //TODO handle case when the client does not manage to esablish connection to server
                 _isConnected = false;
@@ -27,21 +27,21 @@ namespace Client
 
         protected void SetId(int id)
         {
-            _id = id;
+            Id = id;
         }
 
         public void TryConnect(int maximumAttempts)
         {
             int attempts = 0;
-            while (!_mySocket.Connected && attempts < maximumAttempts)
+            while (!MySocket.Connected && attempts < maximumAttempts)
             {
                 try
                 {
                     System.Threading.Thread.Sleep(2000); // fix for mac which sent requests really quickly
                     attempts++;
-                    _mySocket.Connect(IPAddress.Loopback, ServerConstants.UsedPort);
+                    MySocket.Connect(IPAddress.Loopback, ServerConstants.UsedPort);
                     _isConnected = true;
-                    _mySocket.BeginReceive(_buffer, ServerConstants.BufferOffset, _buffer.Length, SocketFlags.None, ReceiveMessage, _mySocket);
+                    MySocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, MySocket);
                     // Listen for messages, which will go to buffer
 
                 }
@@ -67,7 +67,7 @@ namespace Client
             int sizeOfReceivedData = senderSocket.EndReceive(asyncResult);
 
             byte[] temporaryBuffer = new byte[sizeOfReceivedData];
-            Array.Copy(_buffer, temporaryBuffer, sizeOfReceivedData);
+            Array.Copy(Buffer, temporaryBuffer, sizeOfReceivedData);
             // Truncate the data so we do not deal with unnecessary null cells.
 
             string receivedData = Encoding.ASCII.GetString(temporaryBuffer);
@@ -77,7 +77,7 @@ namespace Client
             Console.WriteLine("I got: " + receivedData);
             // Here do something given the data received. Now just send back response and probably wrap this in a function in the future
 
-            senderSocket.BeginReceive(_buffer, ServerConstants.BufferOffset, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), senderSocket);
+            senderSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, senderSocket);
             // Begin receiveng again on the same socket
 
 
@@ -93,13 +93,13 @@ namespace Client
 
                 byte[] toSend = Encoding.ASCII.GetBytes(jsonString);
 
-                _mySocket.Send(toSend);
+                MySocket.Send(toSend);
                 // We are sending synchronously, since we are going to wait for a response we don't need to complicate our lifes
 
                 if (needResponse)
                 {
                     byte[] receivedBuffer = new byte[ServerConstants.BufferSize];
-                    int sizeReceived = _mySocket.Receive(receivedBuffer);
+                    int sizeReceived = MySocket.Receive(receivedBuffer);
                     byte[] actualData = new byte[sizeReceived];
                     Array.Copy(receivedBuffer, actualData, sizeReceived);
 
@@ -109,7 +109,7 @@ namespace Client
             }
             else
             {
-                Console.WriteLine("Client with id " + _id + " is not connected to server");
+                Console.WriteLine("Client with id " + Id + " is not connected to server");
                 // TODO maybe create an internal id, since here all ids will be -1 if initial connection fails
             }
             return "";
@@ -117,7 +117,7 @@ namespace Client
 
         public void RegisterToServerAndGetId(ClientType whoAmI)
         {
-            Packet toSend = new Packet(_id, -1, RequestType.Register);
+            Packet toSend = new Packet(Id, -1, RequestType.Register);
 
             toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, whoAmI);
 

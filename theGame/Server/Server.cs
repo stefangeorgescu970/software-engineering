@@ -20,19 +20,19 @@ namespace Server
         /// <summary>
         /// The buffer in which messages will arrive.
         /// </summary>
-        private static readonly byte[] _buffer = new byte[ServerConstants.BufferSize];
+        private static readonly byte[] Buffer = new byte[ServerConstants.BufferSize];
 
 
         /// <summary>
         /// List of clients.
         /// </summary>
-        private static readonly List<ClientData> _myClients = new List<ClientData>(); // Updated list of clients to serve
+        private static readonly List<ClientData> MyClients = new List<ClientData>(); // Updated list of clients to serve
 
 
         /// <summary>
         /// The server socket. Main communication end-point.
         /// </summary>
-        private static readonly Socket _serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private static readonly Socket ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
 
         /// <summary>
@@ -43,13 +43,13 @@ namespace Server
             Console.WriteLine("Setting up server...");
             // For now, using the console as log
 
-            _serverSocket.Bind(new IPEndPoint(IPAddress.Any, ServerConstants.UsedPort));
+            ServerSocket.Bind(new IPEndPoint(IPAddress.Any, ServerConstants.UsedPort));
             // Make the socket listen on all ip addresses available
 
-            _serverSocket.Listen(ServerConstants.ListenBacklog);
+            ServerSocket.Listen(ServerConstants.ListenBacklog);
             // Explained under ServerConstants
 
-            _serverSocket.BeginAccept(new AsyncCallback(AcceptConnection), null);
+            ServerSocket.BeginAccept(AcceptConnection, null);
             // Accepting connections, with callback function AcceptConnection
 
             Console.WriteLine("Awaiting connection...");
@@ -64,21 +64,21 @@ namespace Server
         private static void AcceptConnection(IAsyncResult asyncResult){
             // Called when a new connection is established, with an async result.
 
-            Socket newSocket = _serverSocket.EndAccept(asyncResult);
+            Socket newSocket = ServerSocket.EndAccept(asyncResult);
             // Get the socket from which we got connection, and end accepting.
 
             ClientData newClient = new ClientData(newSocket);
             // Create new cliend data entity for further reference.
 
-            _myClients.Add(newClient);
+            MyClients.Add(newClient);
 
             Console.WriteLine("Client Connected!");
 
-            newSocket.BeginReceive(_buffer, ServerConstants.BufferOffset, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), newSocket);
+            newSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, newSocket);
             // Begin receiving on that socket, things that will be received will be put in buffer, and ReceiveMessage is the callback of a received message
             // We pass newSocket as objectState so we have access to it in the body of the callback
 
-            _serverSocket.BeginAccept(new AsyncCallback(AcceptConnection), null);
+            ServerSocket.BeginAccept(AcceptConnection, null);
             // We need to begin accepting again in order to allow more than one connection
             // We begin accepting again.
         }
@@ -97,7 +97,7 @@ namespace Server
             int sizeOfReceivedData = senderSocket.EndReceive(asyncResult);
 
             byte[] temporaryBuffer = new byte[sizeOfReceivedData];
-            Array.Copy(_buffer, temporaryBuffer, sizeOfReceivedData);
+            Array.Copy(Buffer, temporaryBuffer, sizeOfReceivedData);
             // Truncate the data so we do not deal with unnecessary null cells.
 
             string receivedData = Encoding.ASCII.GetString(temporaryBuffer);
@@ -113,7 +113,7 @@ namespace Server
                 HandleSendRequest(receivedPacket);
             }
            
-            senderSocket.BeginReceive(_buffer, ServerConstants.BufferOffset, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), senderSocket);
+            senderSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, senderSocket);
             // Begin receiveng again on the same socket
 
             // TODO handle exceptions
@@ -147,7 +147,7 @@ namespace Server
                 {
                     int allocatedId = _currentAvailableIdForPlayers++;
 
-                    foreach (var clientData in _myClients)
+                    foreach (var clientData in MyClients)
                     {
                         if (clientData.Socket != senderSocket) continue;
 
@@ -163,7 +163,7 @@ namespace Server
                 {
                     int allocatedId = 0;
 
-                    foreach (var clientData in _myClients)
+                    foreach (var clientData in MyClients)
                     {
                         if (clientData.Socket != senderSocket) continue;
 
@@ -192,8 +192,8 @@ namespace Server
 
             // TODO maybe find a more beautiful solution using container methods and closures.
 
-            for (int i = 0; i < _myClients.Count; i++) {
-                if(_myClients[i].Id == destinationId) {
+            for (int i = 0; i < MyClients.Count; i++) {
+                if(MyClients[i].Id == destinationId) {
                     return i;
                 }
             }
@@ -212,7 +212,7 @@ namespace Server
             int destinationClientIndex = GetIndexOfDestinationInClients(destinationId);
 
             if(destinationClientIndex != -1) {
-                Socket destinationSocket = _myClients[destinationClientIndex].Socket;
+                Socket destinationSocket = MyClients[destinationClientIndex].Socket;
                 ForwardToClient(packet, destinationSocket);
 
             } else {
@@ -232,10 +232,10 @@ namespace Server
 
             byte[] send = Encoding.ASCII.GetBytes(jsonString);
 
-            socket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, new AsyncCallback(EndSend), socket);
+            socket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, EndSend, socket);
             // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
 
-            socket.BeginReceive(_buffer, ServerConstants.BufferOffset, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), socket);
+            socket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, socket);
             // Begin receiveng again on the same socket
 
         }
@@ -255,10 +255,10 @@ namespace Server
 
             byte[] send = Encoding.ASCII.GetBytes(jsonString);
 
-            senderSocket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, new AsyncCallback(EndSend), senderSocket);
+            senderSocket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, EndSend, senderSocket);
             // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
 
-            senderSocket.BeginReceive(_buffer, ServerConstants.BufferOffset, _buffer.Length, SocketFlags.None, new AsyncCallback(ReceiveMessage), senderSocket);
+            senderSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, senderSocket);
             // Begin receiveng again on the same socket
 
         }

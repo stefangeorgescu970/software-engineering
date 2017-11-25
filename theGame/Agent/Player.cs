@@ -3,21 +3,21 @@ using Server;
 
 namespace Agent
 {
-    public class Player : global::Client.Client
+    public class Player : Client.Client
     {
-	    Tuple<int, int> position;
-        public Team _myTeam;
+	    Tuple<int, int> _position;
+        public Team MyTeam;
         public Player(int i, int j)
         {
             TryConnect(5);
             RegisterToServerAndGetId(ClientType.Agent);
-            position = new Tuple<int, int>(i, j);
-            _myTeam = null;
-            Console.WriteLine($"Player with id: {_id}, initialized on location x: {i} y: {j}");
+            _position = new Tuple<int, int>(i, j);
+            MyTeam = null;
+            Console.WriteLine($"Player with id: {Id}, initialized on location x: {i} y: {j}");
         }
         public void SetTeam(Team myTeam)
         {
-            this._myTeam = myTeam;
+            MyTeam = myTeam;
         }
 
 
@@ -32,11 +32,11 @@ namespace Agent
             while (true)
             {
                 int idx = r.Next(4);
-                int newX = position.Item1 + dx[idx];
-                int newY = position.Item2 + dy[idx];
+                int newX = _position.Item1 + dx[idx];
+                int newY = _position.Item2 + dy[idx];
                 if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10/* && (newX, newY) are not ocupied */ ) // 10 should subtituted by the board size
                 {
-                    position = new Tuple<int, int>(newX, newY);
+                    _position = new Tuple<int, int>(newX, newY);
 
                     return new Tuple<int, int>(newX, newY);
                 }
