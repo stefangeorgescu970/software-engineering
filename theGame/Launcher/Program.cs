@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows;
 using Board;
+using Agent;
+using System.Threading.Tasks;
 
 namespace Launcher
 {
@@ -13,6 +15,7 @@ namespace Launcher
         private static void Main()
         {
             int numberOfPlayers, goalAreaHeight, boardWidth, boardHeight;
+            Thread gameMasterThread;
 
             Console.WriteLine("Number of players:");
 
@@ -43,7 +46,7 @@ namespace Launcher
             }
 
 
-            Console.WriteLine("Press \"Enter\" to start client, \"Esc\" to close it");
+            Console.WriteLine("Press \"Enter\" to start client, \"Esc\" to close it");                      
 
             var appthread = new Thread(() =>
             {
@@ -56,6 +59,14 @@ namespace Launcher
             });
             appthread.SetApartmentState(ApartmentState.STA);
             appthread.Start();
+
+            // Initialize GameMaster
+            Console.WriteLine("Initializing Game Master");
+
+            gameMasterThread = new Thread(() => {
+                GameMaster _gameMaster = new GameMaster();
+            });
+            gameMasterThread.Start();
 
             while (true)
             {

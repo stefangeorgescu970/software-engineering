@@ -47,7 +47,7 @@ namespace Agent
 
         public override void HandleReceivePacket(Packet receivedPacket)
         {
-            SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
+            //SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
         }
     }
 }
