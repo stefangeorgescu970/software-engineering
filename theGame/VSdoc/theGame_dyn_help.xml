@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<DynamicHelp xmlns="http://msdn.microsoft.com/vsdata/xsd/vsdh.xsd" xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance" xsi:schemaLocation="http://msdn.microsoft.com/vsdata/xsd/vsdh.xsd">	
+   <LINKGROUP ID="theGame" Title="SOLUTION-WIDE PROPERTIES Reference Help" Priority="2100">
+      <GLYPH Expanded="vs:/ctxhelp_show.gif" Collapsed="vs:/ctxhelp_hide.gif"/>
+   </LINKGROUP>
+
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.Packet.AddArgument" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000013.html" LinkGroup="theGame">AddArgument Method</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000002A.html" LinkGroup="theGame">Agent Namespace</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Board.App" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000038.html" LinkGroup="theGame">App Class</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants.ArgumentNames" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000001E.html" LinkGroup="theGame">ArgumentNames Class</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.Packet.Arguments" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000012.html" LinkGroup="theGame">Arguments Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Board" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000037.html" LinkGroup="theGame">Board Namespace</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Board.MainWindow.BoardHeight" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000003D.html" LinkGroup="theGame">BoardHeight Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Board.MainWindow.BoardWidth" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000003C.html" LinkGroup="theGame">BoardWidth Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants.BufferOffset" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000001C.html" LinkGroup="theGame">BufferOffset Field</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants.BufferSize" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000001A.html" LinkGroup="theGame">BufferSize Field</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Client.Client" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000022.html" LinkGroup="theGame">Client Class</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Client.Client.Client" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000024.html" LinkGroup="theGame">Client Constructor</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Client" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000021.html" LinkGroup="theGame">Client Namespace</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ClientData" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000001.html" LinkGroup="theGame">ClientData Class</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ClientData.ClientData" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000002.html" LinkGroup="theGame">ClientData Constructor</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ClientType" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000006.html" LinkGroup="theGame">ClientType Enumeration</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ConnectionType" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000009.html" LinkGroup="theGame">ConnectionType Enumeration</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ClientData.ConnectionType" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000005.html" LinkGroup="theGame">ConnectionType Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.Packet.DestinationId" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000010.html" LinkGroup="theGame">DestinationId Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Board.MainWindow.GoalHeight" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000003B.html" LinkGroup="theGame">GoalHeight Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Player.HandleReceivePacket" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000030.html" LinkGroup="theGame">HandleReceivePacket Method {Agent.Player}</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Client.Client.HandleReceivePacket" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000029.html" LinkGroup="theGame">HandleReceivePacket Method {Client.Client}</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants.ArgumentNames.Id" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000001F.html" LinkGroup="theGame">Id Field</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Client.Client.Id" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000023.html" LinkGroup="theGame">Id Field</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ClientData.Id" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000004.html" LinkGroup="theGame">Id Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants.ListenBacklog" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000019.html" LinkGroup="theGame">ListenBacklog Field</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Board.MainWindow" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000039.html" LinkGroup="theGame">MainWindow Class</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Board.MainWindow.MainWindow" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000003E.html" LinkGroup="theGame">MainWindow Constructor</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants.MaximumNumberOfAttemtps" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000001D.html" LinkGroup="theGame">MaximumNumberOfAttemtps Field</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Player.Move" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000002F.html" LinkGroup="theGame">Move Method</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Team.MoveAllPlayers" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000035.html" LinkGroup="theGame">MoveAllPlayers Method</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Player.MyTeam" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000002C.html" LinkGroup="theGame">MyTeam Field</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.Packet" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000000D.html" LinkGroup="theGame">Packet Class</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.Packet.Packet" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000000E.html" LinkGroup="theGame">Packet Constructor</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Player" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000002B.html" LinkGroup="theGame">Player Class</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Player.Player" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000002D.html" LinkGroup="theGame">Player Constructor</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants.PlayerIdPoolStart" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000001B.html" LinkGroup="theGame">PlayerIdPoolStart Field</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Board.MainWindow.PlayerNumber" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000003A.html" LinkGroup="theGame">PlayerNumber Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Client.Client.RegisterToServerAndGetId" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000028.html" LinkGroup="theGame">RegisterToServerAndGetId Method</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.RequestType" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000014.html" LinkGroup="theGame">RequestType Enumeration</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.Packet.RequestType" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000011.html" LinkGroup="theGame">RequestType Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="SOLUTION-WIDE PROPERTIES Reference" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000040.html" LinkGroup="theGame">SOLUTION-WIDE PROPERTIES Reference</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Client.Client.SendPacket" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000027.html" LinkGroup="theGame">SendPacket Method</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.Packet.SenderId" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000000F.html" LinkGroup="theGame">SenderId Property</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants.ArgumentNames.SenderType" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000020.html" LinkGroup="theGame">SenderType Field</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000000.html" LinkGroup="theGame">Server Namespace</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000017.html" LinkGroup="theGame">ServerConstants Class</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Client.Client.SetId" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000025.html" LinkGroup="theGame">SetId Method</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Player.SetTeam" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_000000000000002E.html" LinkGroup="theGame">SetTeam Method</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Team.SetTeamLeader" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000034.html" LinkGroup="theGame">SetTeamLeader Method</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ClientData.Socket" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000003.html" LinkGroup="theGame">Socket Property</LItem>
+      </Links>
+   </Context>
+   
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Team.Team" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000032_overloads--.html" LinkGroup="theGame">Team Constructor</LItem>
+      </Links>
+   </Context>
+   
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Team.Team" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000033_overloads--.html" LinkGroup="theGame">Team Constructor</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Agent.Team" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000031.html" LinkGroup="theGame">Team Class</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Client.Client.TryConnect" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000026.html" LinkGroup="theGame">TryConnect Method</LItem>
+      </Links>
+   </Context>
+   
+
+   <Context>
+      <Keywords>
+         <KItem Name="Server.ServerConstants.UsedPort" />
+      </Keywords>
+      <Links>
+         <LItem URL="ms-its:theGame.chm::/topic_0000000000000018.html" LinkGroup="theGame">UsedPort Field</LItem>
+      </Links>
+   </Context>
+   
+
+</DynamicHelp>
+
