@@ -10,11 +10,26 @@ namespace Client
     public abstract class Client
     {
 
+        /// <summary>
+        /// Communication socket.
+        /// </summary>
         private static readonly Socket MySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        /// <summary>
+        /// Ininital ID
+        /// </summary>
         protected int Id = -1;
+        /// <summary>
+        /// Indicator of connection status.
+        /// </summary>
         private bool _isConnected;
+        /// <summary>
+        /// Buffer for message sending/receiving.
+        /// </summary>
         private static readonly byte[] Buffer = new byte[ServerConstants.BufferSize];
 
+        /// <summary>
+        /// Client constructor. Creates new Client instance and tries to connect to the server.
+        /// </summary>
 	    protected Client()
         {
             TryConnect(ServerConstants.MaximumNumberOfAttemtps);
@@ -25,11 +40,19 @@ namespace Client
             }
         }
 
+        /// <summary>
+        /// Sets received ID of a client.
+        /// </summary>
+        /// <param name="id">Received ID</param>
         protected void SetId(int id)
         {
             Id = id;
         }
 
+        /// <summary>
+        /// Attempts connection to the server.
+        /// </summary>
+        /// <param name="maximumAttempts">Maximum number of connection attempts.</param>
         public void TryConnect(int maximumAttempts)
         {
             int attempts = 0;
@@ -58,6 +81,10 @@ namespace Client
 
         }
 
+        /// <summary>
+        /// Receives message from the socket. 
+        /// </summary>
+        /// <param name="asyncResult">Result of asynchronous Receive(). </param>
         private void ReceiveMessage(IAsyncResult asyncResult)
         {
 
@@ -85,6 +112,12 @@ namespace Client
             // TODO handle exceptions
         }
 
+        /// <summary>
+        /// Sends packet to the server.
+        /// </summary>
+        /// <param name="myPacket">Packet to send</param>
+        /// <param name="needResponse">Indicator whether sender needs response or not.</param>
+        /// <returns></returns>
         public String SendPacket(Packet myPacket, bool needResponse)
         {
             if (_isConnected)
@@ -115,6 +148,10 @@ namespace Client
             return "";
         }
 
+        /// <summary>
+        /// Registers client to the server and gets connection ID. 
+        /// </summary>
+        /// <param name="whoAmI">Client type.</param>
         public void RegisterToServerAndGetId(ClientType whoAmI)
         {
             Packet toSend = new Packet(Id, -1, RequestType.Register);
@@ -132,6 +169,10 @@ namespace Client
             SetId(receivedId);
         }
 
+        /// <summary>
+        /// Abstract method for handling received packet.
+        /// </summary>
+        /// <param name="receivedPacket"></param>
         public abstract void HandleReceivePacket(Packet receivedPacket);
     }
 }

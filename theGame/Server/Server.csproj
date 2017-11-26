@@ -50,6 +50,7 @@
     <Compile Include="ClientType.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ServerClassDiagram.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

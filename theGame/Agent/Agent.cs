@@ -3,8 +3,12 @@ using System.Collections.Generic;
 
 namespace Agent
 {
-    class Program
+    class Agent
     {
+        /// <summary>
+        /// Creates numberof players required by the user.
+        /// </summary>
+        /// <param name="args">Input parameters</param>
         static void Main(string[] args)
         {
             var players = new List<Player>
