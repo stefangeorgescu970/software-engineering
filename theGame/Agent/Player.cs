@@ -1,19 +1,23 @@
 ﻿using System;
+using Server;
 
 namespace Agent
 {
-    class Player
+    public class Player : Client.Client
     {
-	    readonly Tuple<int, int> position;
-        Team _myTeam;
+	    Tuple<int, int> _position;
+        public Team MyTeam;
         public Player(int i, int j)
         {
-            position = new Tuple<int, int>(i, j);
-            _myTeam = null;
+            TryConnect(5);
+            RegisterToServerAndGetId(ClientType.Agent);
+            _position = new Tuple<int, int>(i, j);
+            MyTeam = null;
+            Console.WriteLine($"Player with id: {Id}, initialized on location x: {i} y: {j}");
         }
         public void SetTeam(Team myTeam)
         {
-            this._myTeam = myTeam;
+            MyTeam = myTeam;
         }
 
 
@@ -28,11 +32,11 @@ namespace Agent
             while (true)
             {
                 int idx = r.Next(4);
-                int newX = position.Item1 + dx[idx];
-                int newY = position.Item2 + dy[idx];
+                int newX = _position.Item1 + dx[idx];
+                int newY = _position.Item2 + dy[idx];
                 if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10/* && (newX, newY) are not ocupied */ ) // 10 should subtituted by the board size
                 {
-                    position = new Tuple<int, int>(newX, newY);
+                    _position = new Tuple<int, int>(newX, newY);
 
                     return new Tuple<int, int>(newX, newY);
                 }
@@ -41,5 +45,9 @@ namespace Agent
         }
 
 
+        public override void HandleReceivePacket(Packet receivedPacket)
+        {
+            SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
+        }
     }
 }
