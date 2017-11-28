@@ -9,7 +9,7 @@ namespace Agent
         public Team MyTeam;
         public Player(int i, int j)
         {
-            TryConnect(5);
+            //TryConnect(5);
             RegisterToServerAndGetId(ClientType.Agent);
             _position = new Tuple<int, int>(i, j);
             MyTeam = null;
