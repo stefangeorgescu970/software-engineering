@@ -37,7 +37,7 @@ namespace Client
             {
                 try
                 {
-                    System.Threading.Thread.Sleep(2000); // fix for mac which sent requests really quickly
+                    System.Threading.Thread.Sleep(2000); // fix for mac which sent requests really quickly, TODO - delete this in final stages
                     attempts++;
                     MySocket.Connect(IPAddress.Loopback, ServerConstants.UsedPort);
                     _isConnected = true;
@@ -57,6 +57,8 @@ namespace Client
                 Console.WriteLine("Connected");
 
         }
+
+
 
         private void ReceiveMessage(IAsyncResult asyncResult)
         {
@@ -85,7 +87,9 @@ namespace Client
             // TODO handle exceptions
         }
 
-        public String SendPacket(Packet myPacket, bool needResponse)
+
+
+        public String SendPacket(Packet myPacket)
         {
             if (_isConnected)
             {
@@ -93,19 +97,9 @@ namespace Client
 
                 byte[] toSend = Encoding.ASCII.GetBytes(jsonString);
 
-                MySocket.Send(toSend);
+                MySocket.BeginSend(toSend, ServerConstants.BufferOffset, SocketFlags.None, EndSend, MySocket);
                 // We are sending synchronously, since we are going to wait for a response we don't need to complicate our lifes
 
-                if (needResponse)
-                {
-                    byte[] receivedBuffer = new byte[ServerConstants.BufferSize];
-                    int sizeReceived = MySocket.Receive(receivedBuffer);
-                    byte[] actualData = new byte[sizeReceived];
-                    Array.Copy(receivedBuffer, actualData, sizeReceived);
-
-                    return Encoding.ASCII.GetString(actualData);
-                    // Return the data that we 
-                }
             }
             else
             {
@@ -115,21 +109,28 @@ namespace Client
             return "";
         }
 
+
+
+        /// <summary>
+        /// Callback for ending the send procedure.
+        /// </summary>
+        /// <param name="asyncResult">Async result.</param>
+        private static void EndSend(IAsyncResult asyncResult)
+        {
+            // Here simply end send on the socket we were transmitting
+            Socket senderSocket = (Socket)asyncResult.AsyncState;
+            senderSocket.EndSend(asyncResult);
+        }
+
+
+
         public void RegisterToServerAndGetId(ClientType whoAmI)
         {
             Packet toSend = new Packet(Id, -1, RequestType.Register);
 
             toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, whoAmI);
 
-            String received = SendPacket(toSend, true);
-
-            Console.WriteLine("Received: " + received);
-
-            Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(received);
-
-            int receivedId = Int32.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]);
-
-            SetId(receivedId);
+            SendPacket(toSend);   
         }
 
         public abstract void HandleReceivePacket(Packet receivedPacket);

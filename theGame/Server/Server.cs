@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 
 namespace Server
 {
+    
     class MainServer
     {
         // TODO change this to singleton rather than using static fields.
@@ -22,18 +23,15 @@ namespace Server
         /// </summary>
         private static readonly byte[] Buffer = new byte[ServerConstants.BufferSize];
 
-
         /// <summary>
         /// List of clients.
         /// </summary>
         private static readonly List<ClientData> MyClients = new List<ClientData>(); // Updated list of clients to serve
 
-
         /// <summary>
         /// The server socket. Main communication end-point.
         /// </summary>
         private static readonly Socket ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
 
         /// <summary>
         /// Setups the server.
@@ -54,6 +52,9 @@ namespace Server
 
             Console.WriteLine("Awaiting connection...");
         }
+
+
+        /// MARK - AUTOMATICALLY CALLED CALLBACKS
 
 
         /// <summary>
@@ -119,7 +120,6 @@ namespace Server
             // TODO handle exceptions
         }
 
-
         /// <summary>
         /// Callback for ending the send procedure.
         /// </summary>
@@ -129,6 +129,16 @@ namespace Server
             Socket senderSocket = (Socket)asyncResult.AsyncState;
             senderSocket.EndSend(asyncResult);
         }
+
+
+
+
+
+
+
+
+        // MARK - HANDLE REGISTER REQUEST
+
 
         /// <summary>
         /// Handles the register request.
@@ -184,64 +194,6 @@ namespace Server
 
 
         /// <summary>
-        /// Gets the index of destination in clients.
-        /// </summary>
-        /// <returns>The index of destination in clients.</returns>
-        /// <param name="destinationId">Destination identifier.</param>
-        private static int GetIndexOfDestinationInClients(int destinationId) {
-
-            // TODO maybe find a more beautiful solution using container methods and closures.
-
-            for (int i = 0; i < MyClients.Count; i++) {
-                if(MyClients[i].Id == destinationId) {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-
-        /// <summary>
-        /// Handles the send request.
-        /// </summary>
-        /// <param name="packet">Packet.</param>
-        private static void HandleSendRequest(Packet packet)
-        {
-            int destinationId = packet.DestinationId;
-
-            int destinationClientIndex = GetIndexOfDestinationInClients(destinationId);
-
-            if(destinationClientIndex != -1) {
-                Socket destinationSocket = MyClients[destinationClientIndex].Socket;
-                ForwardToClient(packet, destinationSocket);
-
-            } else {
-                Console.WriteLine("Packet received, but destination not available.");
-            }
-
-        }
-
-
-        /// <summary>
-        /// Forwards a given packet to the client via it's socket.
-        /// </summary>
-        /// <param name="packet">Packet.</param>
-        /// <param name="socket">Socket.</param>
-        private static void ForwardToClient(Packet packet, Socket socket){
-            String jsonString = JsonConvert.SerializeObject(packet);
-
-            byte[] send = Encoding.ASCII.GetBytes(jsonString);
-
-            socket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, EndSend, socket);
-            // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
-
-            socket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, socket);
-            // Begin receiveng again on the same socket
-
-        }
-
-
-        /// <summary>
         /// Sends the allocated id back to the client.
         /// </summary>
         /// <param name="senderSocket">Sender socket.</param>
@@ -262,6 +214,79 @@ namespace Server
             // Begin receiveng again on the same socket
 
         }
+
+
+
+
+
+
+
+        // MARK - HANDLE SEND REQUEST
+
+
+        /// <summary>
+        /// Handles the send request.
+        /// </summary>
+        /// <param name="packet">Packet.</param>
+        private static void HandleSendRequest(Packet packet)
+        {
+            int destinationId = packet.DestinationId;
+
+            int destinationClientIndex = GetIndexOfDestinationInClients(destinationId);
+
+            if (destinationClientIndex != -1)
+            {
+                Socket destinationSocket = MyClients[destinationClientIndex].Socket;
+                ForwardToClient(packet, destinationSocket);
+
+            }
+            else
+            {
+                Console.WriteLine("Packet received, but destination not available.");
+            }
+
+        }
+
+        /// <summary>
+        /// Gets the index of destination in clients.
+        /// </summary>
+        /// <returns>The index of destination in clients.</returns>
+        /// <param name="destinationId">Destination identifier.</param>
+        private static int GetIndexOfDestinationInClients(int destinationId) {
+
+            // TODO maybe find a more beautiful solution using container methods and closures.
+
+            for (int i = 0; i < MyClients.Count; i++) {
+                if(MyClients[i].Id == destinationId) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Forwards a given packet to the client via it's socket.
+        /// </summary>
+        /// <param name="packet">Packet.</param>
+        /// <param name="socket">Socket.</param>
+        private static void ForwardToClient(Packet packet, Socket socket){
+            String jsonString = JsonConvert.SerializeObject(packet);
+
+            byte[] send = Encoding.ASCII.GetBytes(jsonString);
+
+            socket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, EndSend, socket);
+            // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
+
+            socket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, socket);
+            // Begin receiveng again on the same socket
+
+        }
+
+
+
+
+
+
 
 
         public static void Main(string[] args)
