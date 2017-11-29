@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using Newtonsoft.Json;
 
 namespace Server
@@ -27,6 +28,9 @@ namespace Server
         /// List of clients.
         /// </summary>
         private static readonly List<ClientData> MyClients = new List<ClientData>(); // Updated list of clients to serve
+
+        private static readonly Mutex myMutex = new Mutex();
+
 
         /// <summary>
         /// The server socket. Main communication end-point.
@@ -155,7 +159,20 @@ namespace Server
             {
                 case ClientType.Agent:
                 {
-                    int allocatedId = _currentAvailableIdForPlayers++;
+
+
+                        myMutex.WaitOne();
+                        try
+                        {
+                            _currentAvailableIdForPlayers++;
+                        }
+                        finally
+                        {
+                            myMutex.ReleaseMutex();
+                        }
+
+
+                    int allocatedId = _currentAvailableIdForPlayers;
 
                     foreach (var clientData in MyClients)
                     {
