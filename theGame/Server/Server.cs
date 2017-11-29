@@ -200,7 +200,7 @@ namespace Server
         /// <param name="allocatedId">Allocated identifier.</param>
         private static void SendIdToClient(Socket senderSocket, int allocatedId)
         {
-            Packet toSend = new Packet(-1, allocatedId, RequestType.Send);
+            Packet toSend = new Packet(-1, allocatedId, RequestType.Register);
             toSend.AddArgument(ServerConstants.ArgumentNames.Id, allocatedId.ToString());
 
             String jsonString = JsonConvert.SerializeObject(toSend);

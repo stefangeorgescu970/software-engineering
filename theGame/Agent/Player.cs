@@ -47,7 +47,13 @@ namespace Agent
 
         public override void HandleReceivePacket(Packet receivedPacket)
         {
-            SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
+            if(receivedPacket.RequestType == RequestType.Register) {
+                SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));   
+            } else {
+                //TODO - handle something received from another entit
+            }
+
+
         }
     }
 }
