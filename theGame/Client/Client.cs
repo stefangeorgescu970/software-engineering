@@ -95,9 +95,9 @@ namespace Client
             {
                 String jsonString = JsonConvert.SerializeObject(myPacket);
 
-                byte[] toSend = Encoding.ASCII.GetBytes(jsonString);
+                byte[] toSendArray = Encoding.ASCII.GetBytes(jsonString);
 
-                MySocket.BeginSend(toSend, ServerConstants.BufferOffset, SocketFlags.None, EndSend, MySocket);
+                MySocket.BeginSend(toSendArray, ServerConstants.BufferOffset, SocketFlags.None, EndSend, MySocket);
                 // We are sending synchronously, since we are going to wait for a response we don't need to complicate our lifes
 
             }
