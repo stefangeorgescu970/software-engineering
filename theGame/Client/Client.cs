@@ -228,7 +228,7 @@ namespace Client
 
 
 
-        public void SendPacket(Packet myPacket, bool needResponse)
+        public void SendPacket(Packet myPacket)
         {
             if (_isConnected)
             {
@@ -249,26 +249,11 @@ namespace Client
 
         public void RegisterToServerAndGetId(ClientType whoAmI)
         {
-            Log("");
             Packet toSend = new Packet(Id, -1, RequestType.Register);
 
-            Log("");
             toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, whoAmI);
 
-            Log("");
-            String received = SendPacket(toSend, true);
-
-            Log("");
-            Console.WriteLine("Received: " + received);
-
-            Log("");
-            Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(received);
-
-            Log("");
-            int receivedId = Int32.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]);
-
-            Log("");
-            SetId(receivedId);
+            SendPacket(toSend);
         }
 
         public abstract void HandleReceivePacket(Packet receivedPacket);
