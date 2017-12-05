@@ -65,6 +65,8 @@ namespace Server
 
             byte[] bytes = new byte[ServerConstants.ServerBufferSize];
 
+
+            // TODO - here change according to file found
             IPHostEntry ipHostInfo = Dns.GetHostEntry(""); // local
             IPAddress ipAddress = ipHostInfo.AddressList[0];
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, ServerConstants.UsedPort);
@@ -74,12 +76,19 @@ namespace Server
 
 
             try{
-                allDone.Reset();
+                listener.Bind(localEndPoint);
+                listener.Listen(100);
 
-                Console.WriteLine("Waiting for connection...");
-                listener.BeginAccept(new AsyncCallback(AcceptConnection), listener);
+                while(true) {
+                    allDone.Reset();
 
-                allDone.WaitOne();
+                    Console.WriteLine("Waiting for connection...");
+                    listener.BeginAccept(new AsyncCallback(AcceptConnection), listener);
+
+                    allDone.WaitOne();
+                }
+
+
             } catch (Exception e) {
                 Console.WriteLine(e.ToString());
             }
