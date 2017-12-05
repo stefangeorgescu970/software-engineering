@@ -196,6 +196,11 @@ namespace Server
                         Log("");
                         HandleSendRequest(receivedPacket);
                     }
+
+                    StateObject newState = new StateObject();
+
+                    handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+                     new AsyncCallback(ReceiveMessage), newState);
                 }
                 else
                 {

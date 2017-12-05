@@ -181,6 +181,11 @@ namespace Client
 
                         HandleReceivePacket(receivedPacket);
 
+                        StateObject newState = new StateObject();
+
+                        client.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+    new AsyncCallback(ReceiveMessage), newState);
+
                     }
                     // Signal that all bytes have been received.
                     receiveDone.Set();
@@ -202,6 +207,7 @@ namespace Client
             // Begin sending the data to the remote device.
             client.BeginSend(byteData, ServerConstants.BufferOffset, byteData.Length, SocketFlags.None,
                 new AsyncCallback(SendCallback), client);
+            
         }
 
         private static void SendCallback(IAsyncResult ar)
