@@ -72,7 +72,7 @@ namespace Client
             {
                 try
                 {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(string.Empty);
+                    IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
                     IPAddress ipAddress =
                         Array.Find(ipHostInfo.AddressList, a => a.AddressFamily == AddressFamily.InterNetwork);
                     IPEndPoint remoteEP = new IPEndPoint(ipAddress, ServerConstants.UsedPort);
