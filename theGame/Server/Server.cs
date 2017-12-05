@@ -5,10 +5,26 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using Newtonsoft.Json;
 
 namespace Server
 {
+
+    // State object for reading client data asynchronously
+    public class StateObject
+    {
+        // Client  socket.
+        public Socket workSocket = null;
+        // Size of receive buffer.
+        public const int BufferSize = ServerConstants.ServerBufferSize;
+        // Receive buffer.
+        public byte[] buffer = new byte[BufferSize];
+        // Received data string.
+        public StringBuilder sb = new StringBuilder();
+    }
+
+
     class MainServer
     {
         // TODO change this to singleton rather than using static fields.
@@ -21,27 +37,21 @@ namespace Server
         {
             Console.WriteLine("{0}_{1}({2}): {3}", Path.GetFileName(file), member, line, text);
         }
+
+
+        public static ManualResetEvent allDone = new ManualResetEvent(false);
+
+
+
         /// <summary>
         /// The current available identifier for players.
         /// </summary>
         private static int _currentAvailableIdForPlayers = ServerConstants.PlayerIdPoolStart;
-
-        /// <summary>
-        /// The buffer in which messages will arrive.
-        /// </summary>
-        private static readonly byte[] Buffer = new byte[ServerConstants.BufferSize];
-
-
         /// <summary>
         /// List of clients.
         /// </summary>
         private static readonly List<ClientData> MyClients = new List<ClientData>(); // Updated list of clients to serve
 
-
-        /// <summary>
-        /// The server socket. Main communication end-point.
-        /// </summary>
-        private static readonly Socket ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
 
         /// <summary>
@@ -53,16 +63,30 @@ namespace Server
             Console.WriteLine("Setting up server...");
             // For now, using the console as log
 
-            ServerSocket.Bind(new IPEndPoint(IPAddress.Any, ServerConstants.UsedPort));
-            // Make the socket listen on all ip addresses available
+            byte[] bytes = new byte[ServerConstants.ServerBufferSize];
 
-            ServerSocket.Listen(ServerConstants.ListenBacklog);
-            // Explained under ServerConstants
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(""); // local
+            IPAddress ipAddress = ipHostInfo.AddressList[0];
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, ServerConstants.UsedPort);
 
-            ServerSocket.BeginAccept(AcceptConnection, null);
-            // Accepting connections, with callback function AcceptConnection
 
-            Console.WriteLine("Awaiting connection...");
+            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+
+            try{
+                allDone.Reset();
+
+                Console.WriteLine("Waiting for connection...");
+                listener.BeginAccept(new AsyncCallback(AcceptConnection), listener);
+
+                allDone.WaitOne();
+            } catch (Exception e) {
+                Console.WriteLine(e.ToString());
+            }
+
+            Console.WriteLine("\nPress ENTER to continue...");
+            Console.Read();
+
         }
 
 
@@ -75,12 +99,27 @@ namespace Server
         {
             // Called when a new connection is established, with an async result.
 
-            Log("");
-            Socket newSocket = ServerSocket.EndAccept(asyncResult);
-            // Get the socket from which we got connection, and end accepting.
+
+
+            // Signal the main thread to continue.
+            allDone.Set();
+
+
+            // Get the socket that handles the client request.
+            Socket listener = (Socket)asyncResult.AsyncState;
+            Socket handler = listener.EndAccept(asyncResult);
+
+
+            // Create the state object.
+            StateObject state = new StateObject();
+            state.workSocket = handler;
+            handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+                new AsyncCallback(ReceiveMessage), state);
+
+
 
             Log("");
-            ClientData newClient = new ClientData(newSocket);
+            ClientData newClient = new ClientData(handler);
             // Create new cliend data entity for further reference.
 
             Log("");
@@ -88,15 +127,23 @@ namespace Server
 
             Console.WriteLine("Client Connected!");
 
-            Log("");
-            newSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, newSocket);
-            // Begin receiving on that socket, things that will be received will be put in buffer, and ReceiveMessage is the callback of a received message
-            // We pass newSocket as objectState so we have access to it in the body of the callback
 
             Log("");
-            ServerSocket.BeginAccept(AcceptConnection, null);
-            // We need to begin accepting again in order to allow more than one connection
-            // We begin accepting again.
+
+            try
+            {
+                allDone.Reset();
+
+                Console.WriteLine("Waiting for another connection...");
+                listener.BeginAccept(new AsyncCallback(AcceptConnection), listener);
+
+                allDone.WaitOne();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
         }
 
 
@@ -108,46 +155,70 @@ namespace Server
         private static void ReceiveMessage(IAsyncResult asyncResult)
         {
 
-            Log("");
-            Socket senderSocket = (Socket)asyncResult.AsyncState;
-            // passed as argument to begin receive, so we know who send the message
+            String content = String.Empty;
 
-            Log("");
-            int sizeOfReceivedData = senderSocket.EndReceive(asyncResult);
 
-            Log("");
-            byte[] temporaryBuffer = new byte[sizeOfReceivedData];
-            Log("");
-            Array.Copy(Buffer, temporaryBuffer, sizeOfReceivedData);
-            // Truncate the data so we do not deal with unnecessary null cells.
+            // Retrieve the state object and the handler socket
+            // from the asynchronous state object.
+            StateObject state = (StateObject)asyncResult.AsyncState;
+            Socket handler = state.workSocket;
 
-            Log("");
-            string receivedData = Encoding.ASCII.GetString(temporaryBuffer);
 
-            Log("");
-            Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(receivedData);
+            // Read data from the client socket. 
+            int bytesRead = handler.EndReceive(asyncResult);
 
-            Log("");
-            Console.WriteLine("I got: " + receivedData);
-
-            // Handle the received packet.
-            if (receivedPacket.RequestType == RequestType.Register)
+            if (bytesRead > 0)
             {
-                Log("");
-                HandleRegisterRequest(receivedPacket, senderSocket);
-            }
-            else if (receivedPacket.RequestType == RequestType.Send)
-            {
-                Log("");
-                HandleSendRequest(receivedPacket);
+                // There  might be more data, so store the data received so far.
+                state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+
+                // Check for end-of-file tag. If it is not there, read 
+                // more data.
+                content = state.sb.ToString();
+                int eofIndex = content.IndexOf(ServerConstants.endOfPacket, StringComparison.Ordinal);
+                if ( eofIndex > -1)
+                {
+                    // All the data has been read from the 
+                    // client. Display it on the console.
+                    Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
+                        content.Length, content);
+
+
+                    Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(content.Remove(eofIndex));
+
+                    if (receivedPacket.RequestType == RequestType.Register)
+                    {
+                        Log("");
+                        HandleRegisterRequest(receivedPacket, handler);
+                    }
+                    else if (receivedPacket.RequestType == RequestType.Send)
+                    {
+                        Log("");
+                        HandleSendRequest(receivedPacket);
+                    }
+                }
+                else
+                {
+                    // Not all data received. Get more.
+                    handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+                                         new AsyncCallback(ReceiveMessage), state);
+                }
             }
 
-            Log("");
-            senderSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, senderSocket);
-            // Begin receiveng again on the same socket
-
-            // TODO handle exceptions
         }
+
+
+
+
+        private static void Send(Socket handler, String data)
+        {
+            // Convert the string data to byte data using ASCII encoding.
+            byte[] byteData = Encoding.ASCII.GetBytes(data);
+
+            // Begin sending the data to the remote device.
+            handler.BeginSend(byteData, ServerConstants.BufferOffset, byteData.Length, SocketFlags.None, new AsyncCallback(EndSend), handler);
+        }
+
 
 
         /// <summary>
@@ -281,17 +352,10 @@ namespace Server
             Log("");
             String jsonString = JsonConvert.SerializeObject(packet);
 
-            Log("");
-            byte[] send = Encoding.ASCII.GetBytes(jsonString);
+            jsonString += ServerConstants.endOfPacket;
 
-            Log("");
-            socket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, EndSend, socket);
-            // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
-
-            Log("");
-            socket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, socket);
-            // Begin receiveng again on the same socket
-
+            Send(socket, jsonString);
+            
         }
 
 
@@ -311,17 +375,9 @@ namespace Server
             Log("");
             String jsonString = JsonConvert.SerializeObject(toSend);
 
-            Log("");
-            byte[] send = Encoding.ASCII.GetBytes(jsonString);
+            jsonString += ServerConstants.endOfPacket;
 
-            Log("");
-            senderSocket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, EndSend, senderSocket);
-            // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
-
-            Log("");
-            senderSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, senderSocket);
-            // Begin receiveng again on the same socket
-
+            Send(senderSocket, jsonString);
         }
 
 

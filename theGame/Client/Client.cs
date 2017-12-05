@@ -6,16 +6,39 @@ using System.Text;
 using Newtonsoft.Json;
 using Server;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Client
 {
+
+    // State object for receiving data from remote device.
+    public class StateObject
+    {
+        // Client socket.
+        public Socket workSocket = null;
+        // Size of receive buffer.
+        public const int BufferSize = ServerConstants.ClientBufferSize;
+        // Receive buffer.
+        public byte[] buffer = new byte[BufferSize];
+        // Received data string.
+        public StringBuilder sb = new StringBuilder();
+    }
+
+
     public abstract class Client
     {
 
-        private static readonly Socket MySocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        // ManualResetEvent instances signal completion.
+        private static ManualResetEvent connectDone = new ManualResetEvent(false);
+        private static ManualResetEvent sendDone = new ManualResetEvent(false);
+        private static ManualResetEvent receiveDone = new ManualResetEvent(false);
+
         protected int Id = -1;
-        private bool _isConnected;
-        private static readonly byte[] Buffer = new byte[ServerConstants.BufferSize];
+        private bool _isConnected = false;
+
+
+        private Socket _mySocket;
+
 
         private static void Log(string text,
             [CallerFilePath] string file = "",
@@ -28,7 +51,7 @@ namespace Client
         {
             Log("");
             TryConnect(ServerConstants.MaximumNumberOfAttemtps);
-            if (!MySocket.Connected)
+            if (!_isConnected)
             {
                 //TODO handle case when the client does not manage to esablish connection to server
                 _isConnected = false;
@@ -45,19 +68,44 @@ namespace Client
         {
             Log("");
             int attempts = 0;
-            while (!MySocket.Connected && attempts < maximumAttempts)
+            while ( !_isConnected && attempts < maximumAttempts)
             {
                 try
                 {
+                    IPHostEntry ipHostInfo = Dns.GetHostEntry(""); // local
+                    IPAddress ipAddress = ipHostInfo.AddressList[0];
+                    IPEndPoint remoteEP = new IPEndPoint(ipAddress, ServerConstants.UsedPort);
+
+
+                    // Create a TCP/IP socket.
+                    Socket client = new Socket(AddressFamily.InterNetwork,
+                        SocketType.Stream, ProtocolType.Tcp);
+
+
+                    // Connect to the remote endpoint.
+                    client.BeginConnect(remoteEP,
+                        new AsyncCallback(ConnectCallback), client);
+                    connectDone.WaitOne();
+
+
                     Log("");
                     System.Threading.Thread.Sleep(2000); // fix for mac which sent requests really quickly
                     attempts++;
                     Log("");
-                    MySocket.Connect(IPAddress.Loopback, ServerConstants.UsedPort);
+                
                     _isConnected = true;
+                    _mySocket = client;
+
                     Log("");
-                    MySocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, MySocket);
-                    // Listen for messages, which will go to buffer
+
+
+                    // Create the state object.
+                    StateObject state = new StateObject();
+                    state.workSocket = client;
+
+                    // Begin receiving the data from the remote device.
+                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                                        new AsyncCallback(ReceiveMessage), state);
 
                 }
                 catch (SocketException)
@@ -73,77 +121,130 @@ namespace Client
 
         }
 
-        private void ReceiveMessage(IAsyncResult asyncResult)
+
+
+        private static void ConnectCallback(IAsyncResult ar)
         {
+            try
+            {
+                // Retrieve the socket from the state object.
+                Socket client = (Socket)ar.AsyncState;
 
-            Log("");
-            Socket senderSocket = (Socket)asyncResult.AsyncState;
-            // passed as argument to begin receive, so we know who send the message
+                // Complete the connection.
+                client.EndConnect(ar);
 
-            Log("");
-            int sizeOfReceivedData = senderSocket.EndReceive(asyncResult);
+                Console.WriteLine("Socket connected to {0}",
+                    client.RemoteEndPoint.ToString());
 
-            Log("");
-            byte[] temporaryBuffer = new byte[sizeOfReceivedData];
-
-            Log("");
-            Array.Copy(Buffer, temporaryBuffer, sizeOfReceivedData);
-            // Truncate the data so we do not deal with unnecessary null cells.
-
-            Log("");
-            string receivedData = Encoding.ASCII.GetString(temporaryBuffer);
-
-            Log("");
-            Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(receivedData);
-
-            Log("");
-            Console.WriteLine("I got: " + receivedData);
-            // Here do something given the data received. Now just send back response and probably wrap this in a function in the future
-            Log("");
-            senderSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, senderSocket);
-            // Begin receiveng again on the same socket
-
-            Log("");
-            HandleReceivePacket(receivedPacket);
-            // TODO handle exceptions
+                // Signal that the connection has been made.
+                connectDone.Set();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
 
-        public String SendPacket(Packet myPacket, bool needResponse)
+
+
+        private void ReceiveMessage(IAsyncResult asyncResult)
+        {
+            
+            try
+            {
+                // Retrieve the state object and the client socket 
+                // from the asynchronous state object.
+                StateObject state = (StateObject)asyncResult.AsyncState;
+                Socket client = state.workSocket;
+
+                // Read data from the remote device.
+                int bytesRead = client.EndReceive(asyncResult);
+
+                if (bytesRead > 0)
+                {
+                    // There might be more data, so store the data received so far.
+                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+
+                    // Get the rest of the data.
+                    client.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+                        new AsyncCallback(ReceiveMessage), state);
+                }
+                else
+                {
+                    // All the data has arrived; put it in response.
+                    if (state.sb.Length > 1)
+                    {
+                        
+                        String response = state.sb.ToString();
+
+                        Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(response.Remove(response.IndexOf(ServerConstants.endOfPacket, StringComparison.Ordinal)));
+
+                        HandleReceivePacket(receivedPacket);
+
+                    }
+                    // Signal that all bytes have been received.
+                    receiveDone.Set();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+        }
+
+
+        private static void Send(Socket client, String data)
+        {
+            // Convert the string data to byte data using ASCII encoding.
+            byte[] byteData = Encoding.ASCII.GetBytes(data);
+
+            // Begin sending the data to the remote device.
+            client.BeginSend(byteData, ServerConstants.BufferOffset, byteData.Length, SocketFlags.None,
+                new AsyncCallback(SendCallback), client);
+        }
+
+        private static void SendCallback(IAsyncResult ar)
+        {
+            try
+            {
+                // Retrieve the socket from the state object.
+                Socket client = (Socket)ar.AsyncState;
+
+                // Complete sending the data to the remote device.
+                int bytesSent = client.EndSend(ar);
+                Console.WriteLine("Sent {0} bytes to server.", bytesSent);
+
+                // Signal that all bytes have been sent.
+                sendDone.Set();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+        }
+
+
+
+
+
+        public void SendPacket(Packet myPacket, bool needResponse)
         {
             if (_isConnected)
             {
                 Log("");
                 String jsonString = JsonConvert.SerializeObject(myPacket);
 
-                Log("");
-                byte[] toSend = Encoding.ASCII.GetBytes(jsonString);
+                jsonString += ServerConstants.endOfPacket;
 
-                Log("");
-                MySocket.Send(toSend);
-                // We are sending synchronously, since we are going to wait for a response we don't need to complicate our lifes
+                Send(_mySocket, jsonString);
 
-                if (needResponse)
-                {
-                    Log("");
-                    byte[] receivedBuffer = new byte[ServerConstants.BufferSize];
-                    Log("");
-                    int sizeReceived = MySocket.Receive(receivedBuffer);
-                    Log("");
-                    byte[] actualData = new byte[sizeReceived];
-                    Log("");
-                    Array.Copy(receivedBuffer, actualData, sizeReceived);
-
-                    Log("");
-                    return Encoding.ASCII.GetString(actualData);
-                    // Return the data that we 
-                }
             }
             else
             {
                 Console.WriteLine("Client with id " + Id + " is not connected to server");
                 // TODO maybe create an internal id, since here all ids will be -1 if initial connection fails
             }
-            return "";
         }
 
         public void RegisterToServerAndGetId(ClientType whoAmI)
