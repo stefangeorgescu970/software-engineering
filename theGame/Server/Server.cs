@@ -67,8 +67,9 @@ namespace Server
 
 
             // TODO - here change according to file found
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(""); // local
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(string.Empty);
+            IPAddress ipAddress =
+                Array.Find(ipHostInfo.AddressList, a => a.AddressFamily == AddressFamily.InterNetwork);
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, ServerConstants.UsedPort);
 
 
