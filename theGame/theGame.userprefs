@@ -1,8 +1,8 @@
 ﻿<Properties StartupConfiguration="{C001B84F-0AD4-4A77-BC50-6376467CFC8C}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Server/Server.cs">
     <Files>
-      <File FileName="Client/Client.cs" Line="189" Column="22" />
-      <File FileName="Server/Server.cs" Line="329" Column="21" />
+      <File FileName="Client/Client.cs" Line="68" Column="10" />
+      <File FileName="Server/Server.cs" Line="122" Column="51" />
       <File FileName="Agent/Player.cs" Line="58" Column="13" />
     </Files>
   </MonoDevelop.Ide.Workbench>

@@ -72,10 +72,8 @@ namespace Client
             {
                 try
                 {
-                    IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                    IPAddress ipAddress =
-                        Array.Find(ipHostInfo.AddressList, a => a.AddressFamily == AddressFamily.InterNetwork);
-                    IPEndPoint remoteEP = new IPEndPoint(ipAddress, ServerConstants.UsedPort);
+
+                    IPEndPoint remoteEP = new IPEndPoint(IPAddress.Loopback, ServerConstants.UsedPort);
 
 
                     // Create a TCP/IP socket.

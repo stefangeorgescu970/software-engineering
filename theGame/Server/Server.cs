@@ -67,10 +67,8 @@ namespace Server
 
 
             // TODO - here change according to file found
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ipAddress =
-                Array.Find(ipHostInfo.AddressList, a => a.AddressFamily == AddressFamily.InterNetwork);
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, ServerConstants.UsedPort);
+           
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, ServerConstants.UsedPort);
 
 
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -78,7 +76,7 @@ namespace Server
 
             try{
                 listener.Bind(localEndPoint);
-                listener.Listen(100);
+                listener.Listen(ServerConstants.ListenBacklog);
 
                 while(true) {
                     allDone.Reset();
@@ -120,14 +118,6 @@ namespace Server
             Socket handler = listener.EndAccept(asyncResult);
 
 
-            // Create the state object.
-            StateObject state = new StateObject();
-            state.workSocket = handler;
-            handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
-                new AsyncCallback(ReceiveMessage), state);
-
-
-
             Log("");
             ClientData newClient = new ClientData(handler);
             // Create new cliend data entity for further reference.
@@ -135,7 +125,14 @@ namespace Server
             Log("");
             MyClients.Add(newClient);
 
+
             Console.WriteLine("Client Connected!");
+
+            // Create the state object.
+            StateObject state = new StateObject();
+            state.workSocket = handler;
+            handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+                new AsyncCallback(ReceiveMessage), state);
 
 
             Log("");
