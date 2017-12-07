@@ -40,16 +40,10 @@ namespace Client
         private Socket _mySocket;
 
 
-        private static void Log(string text,
-            [CallerFilePath] string file = "",
-            [CallerMemberName] string member = "",
-            [CallerLineNumber] int line = 0)
-        {
-            Console.WriteLine("{0}_{1}({2}): {3}", Path.GetFileName(file), member, line, text);
-        }
+       
         protected Client()
         {
-            Log("");
+            
             TryConnect(ServerConstants.MaximumNumberOfAttemtps);
             if (!_isConnected)
             {
@@ -60,13 +54,13 @@ namespace Client
 
         protected void SetId(int id)
         {
-            Log("");
+            
             Id = id;
         }
 
         public void TryConnect(int maximumAttempts)
         {
-            Log("");
+            
             int attempts = 0;
             while ( !_isConnected && attempts < maximumAttempts)
             {
@@ -87,15 +81,15 @@ namespace Client
                     connectDone.WaitOne();
 
 
-                    Log("");
+                    
                     System.Threading.Thread.Sleep(2000); // fix for mac which sent requests really quickly
                     attempts++;
-                    Log("");
+                    
                 
                     _isConnected = true;
                     _mySocket = client;
 
-                    Log("");
+                    
 
 
                     // Create the state object.
@@ -237,7 +231,7 @@ namespace Client
         {
             if (_isConnected)
             {
-                Log("");
+                
                 String jsonString = JsonConvert.SerializeObject(myPacket);
 
                 jsonString += ServerConstants.endOfPacket;

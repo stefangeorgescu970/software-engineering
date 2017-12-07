@@ -52,6 +52,7 @@ namespace Server
         /// </summary>
         private static readonly List<ClientData> MyClients = new List<ClientData>(); // Updated list of clients to serve
 
+        private static readonly Mutex myMutex = new Mutex();
 
 
         /// <summary>
@@ -96,6 +97,9 @@ namespace Server
             Console.Read();
 
         }
+
+
+        /// MARK - AUTOMATICALLY CALLED CALLBACKS
 
 
         /// <summary>
@@ -247,6 +251,16 @@ namespace Server
             Log("");
         }
 
+
+
+
+
+
+
+
+        // MARK - HANDLE REGISTER REQUEST
+
+
         /// <summary>
         /// Handles the register request.
         /// </summary>
@@ -305,7 +319,7 @@ namespace Server
 
 
         /// <summary>
-        /// Gets the index of destination in clients.
+        /// Sends the allocated id back to the client.
         /// </summary>
         /// <returns>The index of destination in clients.</returns>
         /// <param name="destinationId">Destination identifier.</param>
@@ -325,6 +339,14 @@ namespace Server
             }
             return -1;
         }
+
+
+
+
+
+
+
+        // MARK - HANDLE SEND REQUEST
 
 
         /// <summary>
@@ -391,7 +413,6 @@ namespace Server
 
             Send(senderSocket, jsonString);
         }
-
 
         public static void Main(string[] args)
         {
