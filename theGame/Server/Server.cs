@@ -1,29 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Newtonsoft.Json;
 
 namespace Server
 {
-    
+
+    // State object for reading client data asynchronously
+    public class StateObject
+    {
+        // Client  socket.
+        public Socket workSocket = null;
+        // Size of receive buffer.
+        public const int BufferSize = ServerConstants.ServerBufferSize;
+        // Receive buffer.
+        public byte[] buffer = new byte[BufferSize];
+        // Received data string.
+        public StringBuilder sb = new StringBuilder();
+    }
+
+
     class MainServer
     {
         // TODO change this to singleton rather than using static fields.
         // TODO add method that converts from packet to bytearray.
 
+        public static ManualResetEvent allDone = new ManualResetEvent(false);
+
         /// <summary>
         /// The current available identifier for players.
         /// </summary>
         private static int _currentAvailableIdForPlayers = ServerConstants.PlayerIdPoolStart;
-
-        /// <summary>
-        /// The buffer in which messages will arrive.
-        /// </summary>
-        private static readonly byte[] Buffer = new byte[ServerConstants.BufferSize];
-
         /// <summary>
         /// List of clients.
         /// </summary>
@@ -31,118 +43,172 @@ namespace Server
 
         private static readonly Mutex myMutex = new Mutex();
 
-
-        /// <summary>
-        /// The server socket. Main communication end-point.
-        /// </summary>
-        private static readonly Socket ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
         /// <summary>
         /// Setups the server.
         /// Must always be called. 
         /// </summary>
-        private static void SetupServer(){
+        private static void SetupServer()
+        {
             Console.WriteLine("Setting up server...");
             // For now, using the console as log
 
-            ServerSocket.Bind(new IPEndPoint(IPAddress.Any, ServerConstants.UsedPort));
-            // Make the socket listen on all ip addresses available
+            byte[] bytes = new byte[ServerConstants.ServerBufferSize];
 
-            ServerSocket.Listen(ServerConstants.ListenBacklog);
-            // Explained under ServerConstants
 
-            ServerSocket.BeginAccept(AcceptConnection, null);
-            // Accepting connections, with callback function AcceptConnection
+            // TODO - here change according to file found
 
-            Console.WriteLine("Awaiting connection...");
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, ServerConstants.UsedPort);
+
+            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            try
+            {
+                listener.Bind(localEndPoint);
+                listener.Listen(ServerConstants.ListenBacklog);
+
+                while (true)
+                {
+                    allDone.Reset();
+
+                    Console.WriteLine("Waiting for connection...");
+                    listener.BeginAccept(new AsyncCallback(AcceptConnection), listener);
+
+                    allDone.WaitOne();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            Console.WriteLine("\nPress ENTER to continue...");
+            Console.Read();
         }
 
-
         /// MARK - AUTOMATICALLY CALLED CALLBACKS
-
 
         /// <summary>
         /// Accepts the connection.
         /// Gets called when a new client connects to the server
         /// </summary>
         /// <param name="asyncResult">Async result.</param>
-        private static void AcceptConnection(IAsyncResult asyncResult){
+        private static void AcceptConnection(IAsyncResult asyncResult)
+        {
             // Called when a new connection is established, with an async result.
 
-            Socket newSocket = ServerSocket.EndAccept(asyncResult);
-            // Get the socket from which we got connection, and end accepting.
+            // Signal the main thread to continue.
+            allDone.Set();
 
-            ClientData newClient = new ClientData(newSocket);
+            // Get the socket that handles the client request.
+            Socket listener = (Socket)asyncResult.AsyncState;
+            Socket handler = listener.EndAccept(asyncResult);
+
+            ClientData newClient = new ClientData(handler);
             // Create new cliend data entity for further reference.
 
             MyClients.Add(newClient);
 
             Console.WriteLine("Client Connected!");
 
-            newSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, newSocket);
-            // Begin receiving on that socket, things that will be received will be put in buffer, and ReceiveMessage is the callback of a received message
-            // We pass newSocket as objectState so we have access to it in the body of the callback
+            // Create the state object.
+            StateObject state = new StateObject();
+            state.workSocket = handler;
 
-            ServerSocket.BeginAccept(AcceptConnection, null);
-            // We need to begin accepting again in order to allow more than one connection
-            // We begin accepting again.
+            handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+                new AsyncCallback(ReceiveMessage), state);
+
+            try
+            {
+                allDone.Reset();
+                Console.WriteLine("Waiting for another connection...");
+                listener.BeginAccept(new AsyncCallback(AcceptConnection), listener);
+                allDone.WaitOne();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
         }
-
 
         /// <summary>
         /// Receives the message.
         /// Gets called when a new client sends something to the server
         /// </summary>
         /// <param name="asyncResult">Async result.</param>
-        private static void ReceiveMessage(IAsyncResult asyncResult) {
+        private static void ReceiveMessage(IAsyncResult asyncResult)
+        {
+            String content = String.Empty;
 
-            Socket senderSocket = (Socket)asyncResult.AsyncState; 
-            // passed as argument to begin receive, so we know who send the message
+            // Retrieve the state object and the handler socket
+            // from the asynchronous state object.
+            StateObject state = (StateObject)asyncResult.AsyncState;
+            Socket handler = state.workSocket;
 
-            int sizeOfReceivedData = senderSocket.EndReceive(asyncResult);
+            // Read data from the client socket. 
+            int bytesRead = handler.EndReceive(asyncResult);
 
-            byte[] temporaryBuffer = new byte[sizeOfReceivedData];
-            Array.Copy(Buffer, temporaryBuffer, sizeOfReceivedData);
-            // Truncate the data so we do not deal with unnecessary null cells.
+            if (bytesRead > 0)
+            {
+                // There  might be more data, so store the data received so far.
+                state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
 
-            string receivedData = Encoding.ASCII.GetString(temporaryBuffer);
+                // Check for end-of-file tag. If it is not there, read 
+                // more data.
+                content = state.sb.ToString();
+                int eofIndex = content.IndexOf(ServerConstants.endOfPacket, StringComparison.Ordinal);
+                if (eofIndex > -1)
+                {
+                    // All the data has been read from the 
+                    // client. Display it on the console.
+                    Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
+                        content.Length, content);
 
-            Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(receivedData);
+                    Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(content.Remove(eofIndex));
 
-            Console.WriteLine("I got: " + receivedData);
+                    if (receivedPacket.RequestType == RequestType.Register)
+                    {
+                        HandleRegisterRequest(receivedPacket, handler);
+                    }
+                    else if (receivedPacket.RequestType == RequestType.Send)
+                    {
+                        HandleSendRequest(receivedPacket);
+                    }
 
-            // Handle the received packet.
-            if(receivedPacket.RequestType == RequestType.Register) {
-                HandleRegisterRequest(receivedPacket, senderSocket);
-            } else if (receivedPacket.RequestType == RequestType.Send) {
-                HandleSendRequest(receivedPacket);
+                    StateObject newState = new StateObject();
+
+                    handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+ new AsyncCallback(ReceiveMessage), newState);
+                }
+                else
+                {
+                    // Not all data received. Get more.
+                    handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+                                         new AsyncCallback(ReceiveMessage), state);
+                }
             }
-           
-            senderSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, senderSocket);
-            // Begin receiveng again on the same socket
+        }
 
-            // TODO handle exceptions
+        private static void Send(Socket handler, String data)
+        {
+            // Convert the string data to byte data using ASCII encoding.
+            byte[] byteData = Encoding.ASCII.GetBytes(data);
+
+            // Begin sending the data to the remote device.
+            handler.BeginSend(byteData, ServerConstants.BufferOffset, byteData.Length, SocketFlags.None, new AsyncCallback(EndSend), handler);
         }
 
         /// <summary>
         /// Callback for ending the send procedure.
         /// </summary>
         /// <param name="asyncResult">Async result.</param>
-        private static void EndSend(IAsyncResult asyncResult){
+        private static void EndSend(IAsyncResult asyncResult)
+        {
             // Here simply end send on the socket we were transmitting
             Socket senderSocket = (Socket)asyncResult.AsyncState;
             senderSocket.EndSend(asyncResult);
         }
 
-
-
-
-
-
-
-
         // MARK - HANDLE REGISTER REQUEST
-
 
         /// <summary>
         /// Handles the register request.
@@ -152,14 +218,11 @@ namespace Server
         private static void HandleRegisterRequest(Packet packet, Socket senderSocket)
         {
             //  TODO clean this bit of ugly code
-
             ClientType clientType = (ClientType)((int)packet.Arguments[ServerConstants.ArgumentNames.SenderType]);
-
             switch (clientType)
             {
                 case ClientType.Agent:
                 {
-
 
                         myMutex.WaitOne();
                         try
@@ -172,74 +235,61 @@ namespace Server
                         }
 
 
-                    int allocatedId = _currentAvailableIdForPlayers;
+                     int allocatedId = _currentAvailableIdForPlayers++;
 
-                    foreach (var clientData in MyClients)
-                    {
-                        if (clientData.Socket != senderSocket) continue;
+                        foreach (var clientData in MyClients)
+                        {
+                            if (clientData.Socket != senderSocket) continue;
 
-                        clientData.Id = allocatedId;
-                        clientData.ConnectionType = ConnectionType.Connected;
+                            clientData.Id = allocatedId;
+                            clientData.ConnectionType = ConnectionType.Connected;
+                            break;
+                        }
+                        SendIdToClient(senderSocket, allocatedId);
                         break;
                     }
-
-                    SendIdToClient(senderSocket, allocatedId);
-                    break;
-                }
                 case ClientType.GameMaster:
-                {
-                    int allocatedId = 0;
-
-                    foreach (var clientData in MyClients)
                     {
-                        if (clientData.Socket != senderSocket) continue;
+                        int allocatedId = 0;
 
-                        clientData.Id = allocatedId;
-                        clientData.ConnectionType = ConnectionType.Connected;
+                        foreach (var clientData in MyClients)
+                        {
+                            if (clientData.Socket != senderSocket) continue;
+                            clientData.Id = allocatedId;
+                            clientData.ConnectionType = ConnectionType.Connected;
+                            break;
+                        }
+
+                        SendIdToClient(senderSocket, allocatedId);
+
                         break;
                     }
-
-                    SendIdToClient(senderSocket, allocatedId);
-
-                    break;
-                }
                 default:
                     Console.WriteLine("Invalid request received, do nothing.");
                     break;
             }
         }
 
-
         /// <summary>
         /// Sends the allocated id back to the client.
         /// </summary>
-        /// <param name="senderSocket">Sender socket.</param>
-        /// <param name="allocatedId">Allocated identifier.</param>
-        private static void SendIdToClient(Socket senderSocket, int allocatedId)
+        /// <returns>The index of destination in clients.</returns>
+        /// <param name="destinationId">Destination identifier.</param>
+        private static int GetIndexOfDestinationInClients(int destinationId)
         {
-            Packet toSend = new Packet(-1, allocatedId, RequestType.Register);
-            toSend.AddArgument(ServerConstants.ArgumentNames.Id, allocatedId.ToString());
+            // TODO maybe find a more beautiful solution using container methods and closures.
 
-            String jsonString = JsonConvert.SerializeObject(toSend);
-
-            byte[] send = Encoding.ASCII.GetBytes(jsonString);
-
-            senderSocket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, EndSend, senderSocket);
-            // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
-
-            senderSocket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, senderSocket);
-            // Begin receiveng again on the same socket
-
+            for (int i = 0; i < MyClients.Count; i++)
+            {
+                if (MyClients[i].Id == destinationId)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
-
-
-
-
-
-
         // MARK - HANDLE SEND REQUEST
-
 
         /// <summary>
         /// Handles the send request.
@@ -261,24 +311,6 @@ namespace Server
             {
                 Console.WriteLine("Packet received, but destination not available.");
             }
-
-        }
-
-        /// <summary>
-        /// Gets the index of destination in clients.
-        /// </summary>
-        /// <returns>The index of destination in clients.</returns>
-        /// <param name="destinationId">Destination identifier.</param>
-        private static int GetIndexOfDestinationInClients(int destinationId) {
-
-            // TODO maybe find a more beautiful solution using container methods and closures.
-
-            for (int i = 0; i < MyClients.Count; i++) {
-                if(MyClients[i].Id == destinationId) {
-                    return i;
-                }
-            }
-            return -1;
         }
 
         /// <summary>
@@ -286,25 +318,33 @@ namespace Server
         /// </summary>
         /// <param name="packet">Packet.</param>
         /// <param name="socket">Socket.</param>
-        private static void ForwardToClient(Packet packet, Socket socket){
+        private static void ForwardToClient(Packet packet, Socket socket)
+        {
             String jsonString = JsonConvert.SerializeObject(packet);
 
-            byte[] send = Encoding.ASCII.GetBytes(jsonString);
+            jsonString += ServerConstants.endOfPacket;
 
-            socket.BeginSend(send, ServerConstants.BufferOffset, send.Length, SocketFlags.None, EndSend, socket);
-            // Send response to request OR forward the message to the proper socket if communication. Call EndSend when send is done
-
-            socket.BeginReceive(Buffer, ServerConstants.BufferOffset, Buffer.Length, SocketFlags.None, ReceiveMessage, socket);
-            // Begin receiveng again on the same socket
+            Send(socket, jsonString);
 
         }
 
+        /// <summary>
+        /// Sends the allocated id back to the client.
+        /// </summary>
+        /// <param name="senderSocket">Sender socket.</param>
+        /// <param name="allocatedId">Allocated identifier.</param>
+        private static void SendIdToClient(Socket senderSocket, int allocatedId)
+        {
+            Packet toSend = new Packet(-1, allocatedId, RequestType.Register);
 
+            toSend.AddArgument(ServerConstants.ArgumentNames.Id, allocatedId.ToString());
 
+            String jsonString = JsonConvert.SerializeObject(toSend);
 
+            jsonString += ServerConstants.endOfPacket;
 
-
-
+            Send(senderSocket, jsonString);
+        }
 
         public static void Main(string[] args)
         {
@@ -313,7 +353,5 @@ namespace Server
 
             // Start server and keep console running
         }
-
-
     }
 }

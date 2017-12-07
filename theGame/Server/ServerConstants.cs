@@ -20,7 +20,9 @@ namespace Server
         /// The size of the buffer. 
         /// Might increase depending on message formatting.
         /// </summary>
-        public const int BufferSize = 2048;
+        public const int ServerBufferSize = 1024;
+
+        public const int ClientBufferSize = 256;
 
         /// <summary>
         /// The first available player id.
@@ -36,6 +38,10 @@ namespace Server
         /// The maximum number of attemtps a client has to connect.
         /// </summary>
         public const int MaximumNumberOfAttemtps = 5;
+
+        public const String endOfPacket = "<EOF>";
+
+        public const String tempHostName = "host.server.com";
 
         /// <summary>
         /// Argument names to use when adding parameters.
