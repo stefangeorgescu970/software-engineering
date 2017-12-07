@@ -1,15 +1,16 @@
 ﻿using System;
+using System.IO;
+using System.Runtime.CompilerServices;
 using Server;
 
 namespace Agent
 {
     public class Player : Client.Client
     {
-	    Tuple<int, int> _position;
+        Tuple<int, int> _position;
         public Team MyTeam;
         public Player(int i, int j)
         {
-            //TryConnect(5);
             RegisterToServerAndGetId(ClientType.Agent);
             _position = new Tuple<int, int>(i, j);
             MyTeam = null;
@@ -19,7 +20,6 @@ namespace Agent
         {
             MyTeam = myTeam;
         }
-
 
         /* return a pair of the new position
          * the method should test every possible position whether it is ocupied by other player or not, by asking the server about it
@@ -40,10 +40,8 @@ namespace Agent
 
                     return new Tuple<int, int>(newX, newY);
                 }
-
             }
         }
-
 
         public override void HandleReceivePacket(Packet receivedPacket)
         {
@@ -55,8 +53,6 @@ namespace Agent
             {
                 //TODO - handle something received from another entit
             }
-
-
         }
     }
 }

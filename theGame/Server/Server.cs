@@ -30,18 +30,7 @@ namespace Server
         // TODO change this to singleton rather than using static fields.
         // TODO add method that converts from packet to bytearray.
 
-        private static void Log(string text,
-            [CallerFilePath] string file = "",
-            [CallerMemberName] string member = "",
-            [CallerLineNumber] int line = 0)
-        {
-            Console.WriteLine("{0}_{1}({2}): {3}", Path.GetFileName(file), member, line, text);
-        }
-
-
         public static ManualResetEvent allDone = new ManualResetEvent(false);
-
-
 
         /// <summary>
         /// The current available identifier for players.
@@ -53,7 +42,6 @@ namespace Server
         private static readonly List<ClientData> MyClients = new List<ClientData>(); // Updated list of clients to serve
 
         private static readonly Mutex myMutex = new Mutex();
-
 
         /// <summary>
         /// Setups the server.
@@ -68,18 +56,18 @@ namespace Server
 
 
             // TODO - here change according to file found
-           
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, ServerConstants.UsedPort);
 
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, ServerConstants.UsedPort);
 
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-
-            try{
+            try
+            {
                 listener.Bind(localEndPoint);
                 listener.Listen(ServerConstants.ListenBacklog);
 
-                while(true) {
+                while (true)
+                {
                     allDone.Reset();
 
                     Console.WriteLine("Waiting for connection...");
@@ -87,20 +75,17 @@ namespace Server
 
                     allDone.WaitOne();
                 }
-
-
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine(e.ToString());
             }
 
             Console.WriteLine("\nPress ENTER to continue...");
             Console.Read();
-
         }
 
-
         /// MARK - AUTOMATICALLY CALLED CALLBACKS
-
 
         /// <summary>
         /// Accepts the connection.
@@ -111,52 +96,39 @@ namespace Server
         {
             // Called when a new connection is established, with an async result.
 
-
-
             // Signal the main thread to continue.
             allDone.Set();
-
 
             // Get the socket that handles the client request.
             Socket listener = (Socket)asyncResult.AsyncState;
             Socket handler = listener.EndAccept(asyncResult);
 
-
-            Log("");
             ClientData newClient = new ClientData(handler);
             // Create new cliend data entity for further reference.
 
-            Log("");
             MyClients.Add(newClient);
-
 
             Console.WriteLine("Client Connected!");
 
             // Create the state object.
             StateObject state = new StateObject();
             state.workSocket = handler;
+
             handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
                 new AsyncCallback(ReceiveMessage), state);
-
-
-            Log("");
 
             try
             {
                 allDone.Reset();
-
                 Console.WriteLine("Waiting for another connection...");
                 listener.BeginAccept(new AsyncCallback(AcceptConnection), listener);
-
                 allDone.WaitOne();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
             }
-
         }
-
 
         /// <summary>
         /// Receives the message.
@@ -165,15 +137,12 @@ namespace Server
         /// <param name="asyncResult">Async result.</param>
         private static void ReceiveMessage(IAsyncResult asyncResult)
         {
-
             String content = String.Empty;
-
 
             // Retrieve the state object and the handler socket
             // from the asynchronous state object.
             StateObject state = (StateObject)asyncResult.AsyncState;
             Socket handler = state.workSocket;
-
 
             // Read data from the client socket. 
             int bytesRead = handler.EndReceive(asyncResult);
@@ -187,31 +156,28 @@ namespace Server
                 // more data.
                 content = state.sb.ToString();
                 int eofIndex = content.IndexOf(ServerConstants.endOfPacket, StringComparison.Ordinal);
-                if ( eofIndex > -1)
+                if (eofIndex > -1)
                 {
                     // All the data has been read from the 
                     // client. Display it on the console.
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
                         content.Length, content);
 
-
                     Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(content.Remove(eofIndex));
 
                     if (receivedPacket.RequestType == RequestType.Register)
                     {
-                        Log("");
                         HandleRegisterRequest(receivedPacket, handler);
                     }
                     else if (receivedPacket.RequestType == RequestType.Send)
                     {
-                        Log("");
                         HandleSendRequest(receivedPacket);
                     }
 
                     StateObject newState = new StateObject();
 
                     handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
-                     new AsyncCallback(ReceiveMessage), newState);
+ new AsyncCallback(ReceiveMessage), newState);
                 }
                 else
                 {
@@ -220,11 +186,7 @@ namespace Server
                                          new AsyncCallback(ReceiveMessage), state);
                 }
             }
-
         }
-
-
-
 
         private static void Send(Socket handler, String data)
         {
@@ -235,8 +197,6 @@ namespace Server
             handler.BeginSend(byteData, ServerConstants.BufferOffset, byteData.Length, SocketFlags.None, new AsyncCallback(EndSend), handler);
         }
 
-
-
         /// <summary>
         /// Callback for ending the send procedure.
         /// </summary>
@@ -244,22 +204,11 @@ namespace Server
         private static void EndSend(IAsyncResult asyncResult)
         {
             // Here simply end send on the socket we were transmitting
-            Log("");
             Socket senderSocket = (Socket)asyncResult.AsyncState;
-            Log("");
             senderSocket.EndSend(asyncResult);
-            Log("");
         }
 
-
-
-
-
-
-
-
         // MARK - HANDLE REGISTER REQUEST
-
 
         /// <summary>
         /// Handles the register request.
@@ -269,39 +218,31 @@ namespace Server
         private static void HandleRegisterRequest(Packet packet, Socket senderSocket)
         {
             //  TODO clean this bit of ugly code
-            Log("");
             ClientType clientType = (ClientType)((int)packet.Arguments[ServerConstants.ArgumentNames.SenderType]);
-            Log("");
             switch (clientType)
             {
                 case ClientType.Agent:
                     {
-                        Log("");
                         int allocatedId = _currentAvailableIdForPlayers++;
 
                         foreach (var clientData in MyClients)
                         {
-                            Log("");
                             if (clientData.Socket != senderSocket) continue;
 
                             clientData.Id = allocatedId;
                             clientData.ConnectionType = ConnectionType.Connected;
                             break;
                         }
-                        Log("");
                         SendIdToClient(senderSocket, allocatedId);
                         break;
                     }
                 case ClientType.GameMaster:
                     {
-                        Log("");
                         int allocatedId = 0;
 
-                        Log("");
                         foreach (var clientData in MyClients)
                         {
                             if (clientData.Socket != senderSocket) continue;
-
                             clientData.Id = allocatedId;
                             clientData.ConnectionType = ConnectionType.Connected;
                             break;
@@ -317,7 +258,6 @@ namespace Server
             }
         }
 
-
         /// <summary>
         /// Sends the allocated id back to the client.
         /// </summary>
@@ -325,13 +265,10 @@ namespace Server
         /// <param name="destinationId">Destination identifier.</param>
         private static int GetIndexOfDestinationInClients(int destinationId)
         {
-
-            Log("");
             // TODO maybe find a more beautiful solution using container methods and closures.
 
             for (int i = 0; i < MyClients.Count; i++)
             {
-                Log("");
                 if (MyClients[i].Id == destinationId)
                 {
                     return i;
@@ -340,14 +277,7 @@ namespace Server
             return -1;
         }
 
-
-
-
-
-
-
         // MARK - HANDLE SEND REQUEST
-
 
         /// <summary>
         /// Handles the send request.
@@ -355,13 +285,10 @@ namespace Server
         /// <param name="packet">Packet.</param>
         private static void HandleSendRequest(Packet packet)
         {
-            Log("");
             int destinationId = packet.DestinationId;
 
-            Log("");
             int destinationClientIndex = GetIndexOfDestinationInClients(destinationId);
 
-            Log("");
             if (destinationClientIndex != -1)
             {
                 Socket destinationSocket = MyClients[destinationClientIndex].Socket;
@@ -372,9 +299,7 @@ namespace Server
             {
                 Console.WriteLine("Packet received, but destination not available.");
             }
-
         }
-
 
         /// <summary>
         /// Forwards a given packet to the client via it's socket.
@@ -383,15 +308,13 @@ namespace Server
         /// <param name="socket">Socket.</param>
         private static void ForwardToClient(Packet packet, Socket socket)
         {
-            Log("");
             String jsonString = JsonConvert.SerializeObject(packet);
 
             jsonString += ServerConstants.endOfPacket;
 
             Send(socket, jsonString);
-            
-        }
 
+        }
 
         /// <summary>
         /// Sends the allocated id back to the client.
@@ -400,13 +323,10 @@ namespace Server
         /// <param name="allocatedId">Allocated identifier.</param>
         private static void SendIdToClient(Socket senderSocket, int allocatedId)
         {
-            Log("");
-            Packet toSend = new Packet(-1, allocatedId, RequestType.Send);
+            Packet toSend = new Packet(-1, allocatedId, RequestType.Register);
 
-            Log("");
             toSend.AddArgument(ServerConstants.ArgumentNames.Id, allocatedId.ToString());
 
-            Log("");
             String jsonString = JsonConvert.SerializeObject(toSend);
 
             jsonString += ServerConstants.endOfPacket;
@@ -421,7 +341,5 @@ namespace Server
 
             // Start server and keep console running
         }
-
-
     }
 }
