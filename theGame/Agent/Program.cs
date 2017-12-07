@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Server;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Agent
 {
@@ -7,17 +10,23 @@ namespace Agent
     {
         static void Main(string[] args)
         {
-            var players = new List<Player>
+            int teamLeaderId = int.Parse(args[0]);
+
+            Board gameBoard = new Board(10, 10, 2);
+            Tuple<int, int> location = new Tuple<int, int>(1, 1);
+
+            if (teamLeaderId == 0)
             {
-                args != null && args.Length > 0
-                ? new Player(i: int.Parse(args[0]), j: int.Parse(args[0]))
-                : new Player(1, 1)
-            };
+                //assume 0 as teamleaderId argument indicates team Leader case
+                var no_players = 3;
+                var player = new TeamLeader(location, no_players, gameBoard);
 
-
-            var team = new Team(players);
-                team.MoveAllPlayers();
-
+            }
+            else
+            {
+                var player = new Player(location, gameBoard, teamLeaderId);
+            }
+            
             Console.ReadKey();
         }
     }

@@ -30,6 +30,11 @@ namespace Client
             Id = id;
         }
 
+        public int GetId()
+        {
+            return Id;
+        }
+
         public void TryConnect(int maximumAttempts)
         {
             int attempts = 0;
@@ -97,7 +102,7 @@ namespace Client
 
                 byte[] toSendArray = Encoding.ASCII.GetBytes(jsonString);
 
-                MySocket.BeginSend(toSendArray, ServerConstants.BufferOffset, SocketFlags.None, EndSend, MySocket);
+                MySocket.BeginSend(toSendArray, ServerConstants.BufferOffset, toSendArray.Length, SocketFlags.None, EndSend, MySocket);
                 // We are sending synchronously, since we are going to wait for a response we don't need to complicate our lifes
 
             }

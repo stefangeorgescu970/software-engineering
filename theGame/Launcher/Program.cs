@@ -89,7 +89,7 @@ namespace Launcher
                 {
                     StartInfo =
                     {
-                        Arguments = string.Concat($"{numberOfPlayers}", $"{goalAreaHeight}"),
+                        Arguments = string.Concat( $"0", $"{numberOfPlayers}", $"{goalAreaHeight}"),
                         FileName = @"..\..\..\Agent\bin\Debug\Agent.exe",
                         CreateNoWindow = true,
                         UseShellExecute = true
