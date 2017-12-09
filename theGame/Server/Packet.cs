@@ -59,28 +59,28 @@ namespace Server
         /// Gets or sets the sender identifier.
         /// </summary>
         /// <value>The sender identifier.</value>
-        public int SenderId { get => _senderId; set => _senderId = value; }
+        public int SenderId { get { return _senderId; } set { _senderId = value; } }
 
 
         /// <summary>
         /// Gets or sets the destination identifier.
         /// </summary>
         /// <value>The destination identifier.</value>
-        public int DestinationId { get => _destinationId; set => _destinationId = value; }
+        public int DestinationId { get { return _destinationId; } set { _destinationId = value; } }
 
 
         /// <summary>
         /// Gets or sets the type of the request.
         /// </summary>
         /// <value>The type of the request.</value>
-        public RequestType RequestType { get => _requestType; set => _requestType = value; }
+        public RequestType RequestType { get { return _requestType; } set { _requestType = value; } }
 
 
         /// <summary>
         /// Gets or sets the arguments.
         /// </summary>
         /// <value>The arguments.</value>
-        public Dictionary<String, dynamic> Arguments { get => _arguments; set => _arguments = value; }
+        public Dictionary<String, dynamic> Arguments { get { return _arguments; } set { _arguments = value; } }
 
 
         /// <summary>
