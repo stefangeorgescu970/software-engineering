@@ -10,10 +10,8 @@ namespace Agent
         Tuple<int, int> _position;
         public Team MyTeam;
       
-        private static int count = 1;   //assign Id to every player starting from 1.  
         public Player(int i, int j)
         {
-            Id = count++;
             RegisterToServerAndGetId(ClientType.Agent);
             _position = new Tuple<int, int>(i, j);
             MyTeam = null;
