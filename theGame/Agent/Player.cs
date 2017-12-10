@@ -9,6 +9,7 @@ namespace Agent
     {
         Tuple<int, int> _position;
         public Team MyTeam;
+      
         public Player(int i, int j)
         {
             RegisterToServerAndGetId(ClientType.Agent);
@@ -21,9 +22,12 @@ namespace Agent
             MyTeam = myTeam;
         }
 
-        /* return a pair of the new position
-         * the method should test every possible position whether it is ocupied by other player or not, by asking the server about it
-        */
+        /// <summary>
+        /// return a pair of the new position, 
+        /// the method should test every possible position whether it is ocupied by other player or not, by asking the server about it
+        /// </summary>
+        /// <returns></returns>
+
         public Tuple<int, int> Move()   
         {
             int []dx = {-1, 0, 1, 0};
@@ -43,8 +47,13 @@ namespace Agent
             }
         }
 
+        public int getId()
+        {
+            return Id;
+        }
         public override void HandleReceivePacket(Packet receivedPacket)
         {
+
             if (receivedPacket.RequestType == RequestType.Register)
             {
                 SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));

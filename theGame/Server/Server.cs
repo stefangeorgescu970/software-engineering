@@ -176,6 +176,8 @@ namespace Server
 
                     StateObject newState = new StateObject();
 
+                    newState.workSocket = handler;      // adding socket to the new state
+
                     handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
  new AsyncCallback(ReceiveMessage), newState);
                 }
