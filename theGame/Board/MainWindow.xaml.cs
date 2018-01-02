@@ -15,14 +15,20 @@ namespace Board
 		public int GoalHeight { get; set; }
 		public int BoardWidth { get; set; }
 		public int BoardHeight { get; set; }
-
+        /// <summary>
+        /// bool 2d array tells whether a cell is occupied by a player or not
+        /// </summary>
+        public bool [,]occupied = new bool[40, 40];
+        /// <summary>
+        /// bool 2d array tells whether a cell is has a piece or not
+        /// </summary>
+        public bool[,] pieaces = new bool[40, 40];
 		public MainWindow(int numberOfPlayers, int goalAreaH, int boardW, int boardH)
 		{
 			PlayerNumber = numberOfPlayers;
 			GoalHeight = goalAreaH;
 			BoardWidth = boardW;
 			BoardHeight = boardH;
-
 			InitializeComponent();
 			CreateBoard(BoardWidth, BoardHeight, GoalHeight);
 		}
@@ -57,12 +63,29 @@ namespace Board
                     Grid.SetRow(border, j);
                     boardGrid.Children.Add(border);
                 }
-            }
-
+            }           
 			Content = boardGrid;
 		}
 
-		
-
+		/// <summary>
+        /// check whether a cell is occupied or not
+        /// </summary>
+        /// <param name="i">index i</param>
+        /// <param name="j">index j</param>
+        /// <returns></returns>
+        public bool IsOccupied(int i, int j)
+        {
+            return occupied[i, j];
+        }
+        /// <summary>
+        /// check whether a cell has a piece or not
+        /// </summary>
+        /// <param name="i">row i</param>
+        /// <param name="j">column j</param>
+        /// <returns></returns>
+        public bool IsPiece(int i, int j)
+        {
+            return pieaces[i, j];
+        }
 	}
 }

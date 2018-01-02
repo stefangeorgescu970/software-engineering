@@ -40,7 +40,6 @@ namespace Server
         /// List of clients.
         /// </summary>
         private static readonly List<ClientData> MyClients = new List<ClientData>(); // Updated list of clients to serve
-
         private static readonly Mutex myMutex = new Mutex();
 
         /// <summary>
@@ -107,7 +106,7 @@ namespace Server
             // Create new cliend data entity for further reference.
 
             MyClients.Add(newClient);
-
+            
             Console.WriteLine("Client Connected!");
 
             // Create the state object.
