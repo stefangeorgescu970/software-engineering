@@ -164,17 +164,23 @@ namespace Server
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
                         content.Length, content);
 
-                    // TODO - split packets by EOF tag
+                    string[] stringSeparators = new string[] { "<EOF>" };
 
-                    Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(content.Remove(eofIndex));
+                    String[] packets = content.Split(stringSeparators, StringSplitOptions.None);
 
-                    if (receivedPacket.RequestType == RequestType.Register)
+
+                    foreach (String packet in packets) 
                     {
-                        HandleRegisterRequest(receivedPacket, handler);
-                    }
-                    else if (receivedPacket.RequestType == RequestType.Send)
-                    {
-                        HandleSendRequest(receivedPacket);
+                        Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(packet);
+
+                        if (receivedPacket.RequestType == RequestType.Register)
+                        {
+                            HandleRegisterRequest(receivedPacket, handler);
+                        }
+                        else if (receivedPacket.RequestType == RequestType.Send)
+                        {
+                            HandleSendRequest(receivedPacket);
+                        }
                     }
 
                     state.sb.Clear();
