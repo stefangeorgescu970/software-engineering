@@ -43,7 +43,7 @@ namespace Agent
             RegisterToServerAndGetId(ClientType.Agent);
             location = new Tuple<int, int>(i, j);
             MyTeam = null;
-            Console.WriteLine($"TeamLeader with id: {Id}, initialized on location x: {i} y: {j}");
+            Console.WriteLine($"TeamLeader initialized");
         }
 
         public TeamLeader(Tuple<int, int> locaton, int no_players, Board gameBoard)
@@ -53,7 +53,7 @@ namespace Agent
             this.gameBoard = gameBoard;
             TryConnect(5);
             RegisterToServerAndGetId(ClientType.Agent);
-            Console.WriteLine($"TeamLeader with id: {Id}, initialized on location x: {location.Item1} y: {location.Item2}");
+            Console.WriteLine($"TeamLeader initialized");
         }
 
 
@@ -85,7 +85,10 @@ namespace Agent
         {
             if (receivedPacket.RequestType == RequestType.Register)
             {
+                Console.WriteLine($"response is there");
                 SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
+                Console.WriteLine($"TeamLeader id set to {Id}");
+
                 for (var i = MyTeam.NumberOfPlayers; i > 0; i--)
                     CreateTeamMember(GetId());
             }
@@ -93,6 +96,7 @@ namespace Agent
             {
                 int senderId = receivedPacket.SenderId;
                 MyTeam.PlayersIds.Add(senderId);
+                Console.WriteLine($"Player with id {senderId} added to team");
             }
 
 
@@ -111,6 +115,7 @@ namespace Agent
                     }
             };
             p.Start();
+            Console.WriteLine($"TeamLeader created team member");
         }
     }
     public class Player : Client.Client
@@ -127,7 +132,7 @@ namespace Agent
             RegisterToServerAndGetId(ClientType.Agent);
             _position = new Tuple<int, int>(i, j);
             MyTeam = null;
-            Console.WriteLine($"Player with id: {Id}, initialized on location x: {i} y: {j}");
+            Console.WriteLine($"Player initialized");
         }
 
         public Player(Tuple<int, int> location, Board gameBoard, int TeamLeaderId)
@@ -137,7 +142,7 @@ namespace Agent
             this.teamLeaderId = TeamLeaderId;
             TryConnect(5);
             RegisterToServerAndGetId(ClientType.Agent);
-            Console.WriteLine($"Player with id: {Id}, initialized on location x: {location.Item1} y: {location.Item2}");
+            Console.WriteLine($"Player initialized");
         }
         
         /* return a pair of the new position
@@ -168,9 +173,11 @@ namespace Agent
         {
             if(receivedPacket.RequestType == RequestType.Register) {
                 SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
+                Console.WriteLine($"Player id set to {Id}");
                 SendPacket(new Packet(GetId(), teamLeaderId, RequestType.Send));
             } else {
                 //TODO - handle something received from another entit
+                Console.WriteLine($"Player recieved packet ");
             }
 
 

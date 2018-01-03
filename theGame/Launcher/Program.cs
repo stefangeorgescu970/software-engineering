@@ -12,35 +12,35 @@ namespace Launcher
 
         private static void Main()
         {
-            int numberOfPlayers, goalAreaHeight, boardWidth, boardHeight;
+            int numberOfPlayers = 10, goalAreaHeight = 10, boardWidth = 10, boardHeight = 10;
 
-            Console.WriteLine("Number of players:");
+            //Console.WriteLine("Number of players:");
 
-            while (!int.TryParse(Console.ReadLine(), out numberOfPlayers))
-                Console.WriteLine("\t Please enter an integer");
+            //while (!int.TryParse(Console.ReadLine(), out numberOfPlayers))
+            //    Console.WriteLine("\t Please enter an integer");
 
-            Console.WriteLine("Board width:");
+            //Console.WriteLine("Board width:");
 
-            while (!int.TryParse(Console.ReadLine(), out boardWidth))
-                Console.WriteLine("\t Please enter an integer");
+            //while (!int.TryParse(Console.ReadLine(), out boardWidth))
+            //    Console.WriteLine("\t Please enter an integer");
 
-            Console.WriteLine("Board height:");
+            //Console.WriteLine("Board height:");
 
-            while (!int.TryParse(Console.ReadLine(), out boardHeight))
-                Console.WriteLine("\t Please enter an integer");
+            //while (!int.TryParse(Console.ReadLine(), out boardHeight))
+            //    Console.WriteLine("\t Please enter an integer");
 
-            Console.WriteLine("Goal area height:");
+            //Console.WriteLine("Goal area height:");
 
-            while (!int.TryParse(Console.ReadLine(), out goalAreaHeight))
-                Console.WriteLine("\t Please enter an integer");
+            //while (!int.TryParse(Console.ReadLine(), out goalAreaHeight))
+            //    Console.WriteLine("\t Please enter an integer");
 
-            if (goalAreaHeight > boardHeight / 2)
-            {
-                Console.WriteLine(
-                    " \tThe height of goal area has to be smaller than half of the board height. \n \t Please enter valid height");
-                while (!int.TryParse(Console.ReadLine(), out goalAreaHeight))
-                    Console.WriteLine("\t Please enter an integer");
-            }
+            //if (goalAreaHeight > boardHeight / 2)
+            //{
+            //    Console.WriteLine(
+            //        " \tThe height of goal area has to be smaller than half of the board height. \n \t Please enter valid height");
+            //    while (!int.TryParse(Console.ReadLine(), out goalAreaHeight))
+            //        Console.WriteLine("\t Please enter an integer");
+            //}
 
 
             Console.WriteLine("Press \"Enter\" to start client, \"Esc\" to close it");
@@ -87,7 +87,7 @@ namespace Launcher
             {
                 StartInfo =
                 {
-                    Arguments = string.Concat( $"0", $"{numberOfPlayers - 1}", $"{goalAreaHeight}"),
+                    Arguments =  $"0" + " " + $"{numberOfPlayers - 1}" + " " + $"{goalAreaHeight}",
                     FileName = @"..\..\..\Agent\bin\Debug\Agent.exe",
                     CreateNoWindow = true,
                     UseShellExecute = true
