@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -25,30 +26,39 @@ namespace Board
         public bool[,] pieaces = new bool[40, 40];
 		public MainWindow(int numberOfPlayers, int goalAreaH, int boardW, int boardH)
 		{
-			PlayerNumber = numberOfPlayers;
+		    if (numberOfPlayers <= 0 )
+		        throw new ArgumentException("Number of players zero", nameof(numberOfPlayers));
+            if (goalAreaH <= 0)
+		        throw new ArgumentException("Goal area height zero", nameof(goalAreaH));
+		    if (boardW <= 0)
+		        throw new ArgumentException("Board width zero", nameof(boardW));
+		    if (boardH <= 0)
+		        throw new ArgumentException("Board height zero", nameof(boardH));
+
+            PlayerNumber = numberOfPlayers;
 			GoalHeight = goalAreaH;
 			BoardWidth = boardW;
 			BoardHeight = boardH;
 			InitializeComponent();
-			CreateBoard(BoardWidth, BoardHeight, GoalHeight);
-		}
+            Content = CreateBoard();
+        }
 
-	    private void CreateBoard(int width, int height, int gheight)
-		{
-			Grid boardGrid = new Grid
+	    public Grid CreateBoard()
+	    {
+            Grid boardGrid = new Grid
 			{
 				Margin = new Thickness(30),
 				Background = Brushes.Beige
 			};
 
-			for (int i = 0; i < width; i++)
+			for (int i = 0; i < BoardWidth; i++)
 				boardGrid.ColumnDefinitions.Add(new ColumnDefinition());
-			for (int i = 0; i < height; i++)
+			for (int i = 0; i < BoardHeight; i++)
 				boardGrid.RowDefinitions.Add(new RowDefinition());
 
-            for (int i = 0; i < width; i++)
+            for (int i = 0; i < BoardWidth; i++)
             {
-                for (int j = 0; j < height; j++)
+                for (int j = 0; j < BoardHeight; j++)
                 {
                     Border border = new Border
                     {
@@ -56,36 +66,43 @@ namespace Board
                         BorderThickness = new Thickness(1)
                     };
 
-                    if (j < gheight || j >= (height - gheight))
+                    if (j < GoalHeight || j >= (BoardHeight - GoalHeight))
                         border.BorderBrush = Brushes.DarkGray;
 
                     Grid.SetColumn(border, i);
                     Grid.SetRow(border, j);
                     boardGrid.Children.Add(border);
                 }
-            }           
-			Content = boardGrid;
+            }
+
+			return boardGrid;
 		}
 
-		/// <summary>
-        /// check whether a cell is occupied or not
-        /// </summary>
-        /// <param name="i">index i</param>
-        /// <param name="j">index j</param>
-        /// <returns></returns>
-        public bool IsOccupied(int i, int j)
-        {
-            return occupied[i, j];
-        }
-        /// <summary>
-        /// check whether a cell has a piece or not
-        /// </summary>
-        /// <param name="i">row i</param>
-        /// <param name="j">column j</param>
-        /// <returns></returns>
-        public bool IsPiece(int i, int j)
-        {
-            return pieaces[i, j];
-        }
-	}
+
+
+	    /// <summary>
+	    /// check whether a cell is occupied or not
+	    /// </summary>
+	    /// <param name="i">index i</param>
+	    /// <param name="j">index j</param>
+	    /// <returns></returns>
+	    public bool IsOccupied(int i, int j)
+	    {
+	        return occupied[i, j];
+	    }
+	    /// <summary>
+	    /// check whether a cell has a piece or not
+	    /// </summary>
+	    /// <param name="i">row i</param>
+	    /// <param name="j">column j</param>
+	    /// <returns></returns>
+	    public bool IsPiece(int i, int j)
+	    {
+	        return pieaces[i, j];
+	    }
+
+    }
 }
+
+
+		

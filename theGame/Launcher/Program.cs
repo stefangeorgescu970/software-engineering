@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows;
@@ -69,24 +70,24 @@ namespace Launcher
            
             Console.WriteLine("Number of players:");
 
-            while (!int.TryParse(Console.ReadLine(), out numberOfPlayers))
+            while (!int.TryParse(Console.ReadLine(), out numberOfPlayers) || !(numberOfPlayers > 0) )
                 Console.WriteLine("\t Please enter an integer");
 
 
 
             Console.WriteLine("Board width:");
 
-            while (!int.TryParse(Console.ReadLine(), out boardWidth))
+            while (!int.TryParse(Console.ReadLine(), out boardWidth) || !(boardWidth > 0))
                 Console.WriteLine("\t Please enter an integer");
 
             Console.WriteLine("Board height:");
 
-            while (!int.TryParse(Console.ReadLine(), out boardHeight))
+            while (!int.TryParse(Console.ReadLine(), out boardHeight) || !(boardHeight > 0))
                 Console.WriteLine("\t Please enter an integer");
 
             Console.WriteLine("Goal area height:");
 
-            while (!int.TryParse(Console.ReadLine(), out goalAreaHeight))
+            while (!int.TryParse(Console.ReadLine(), out goalAreaHeight) || !(goalAreaHeight > 0))
                 Console.WriteLine("\t Please enter an integer");
 
             if (goalAreaHeight > boardHeight / 2)
@@ -121,11 +122,33 @@ namespace Launcher
                 {
                     Console.WriteLine("Launching client");
                     // Use of dispatcher necessary as this is a cross-thread operation
+                    try
+                    {
+                        DispatchToApp(() =>
+                            new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth, boardHeight).Show());
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == "numberOfPlayers")
+                    {
+                        Console.WriteLine("Something wrong with number of players");
+                        return;
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == "goalAreaH")
+                    {
+                        Console.WriteLine("Something wrong with height of the goal area");
+                        return;
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == "boardW")
+                    {
+                        Console.WriteLine("Something wrong with board width");
+                        return;
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == "boardH")
+                    {
+                        Console.WriteLine("Something wrong with board height");
+                        return;
+                    }
 
-                    DispatchToApp(() =>
-                      (master.board =  new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth, boardHeight)).Show());
                     GeneratePlayers(numberOfPlayers, goalAreaHeight);
-                    
                 }
                 // Press Esc to exit
                 if (key == ConsoleKey.Escape)
@@ -165,3 +188,4 @@ namespace Launcher
         }
     }
 }
+                   
