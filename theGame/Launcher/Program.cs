@@ -67,7 +67,7 @@ namespace Launcher
                     // Use of dispatcher necessary as this is a cross-thread operation
                     DispatchToApp(() =>
                         new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth, boardHeight).Show());
-                    GeneratePlayers(numberOfPlayers, goalAreaHeight);
+                    GenerateTeamLeader(numberOfPlayers, goalAreaHeight);
                 }
                 // Press Esc to exit
                 if (key == ConsoleKey.Escape)
@@ -81,22 +81,19 @@ namespace Launcher
             Console.ReadKey();
         }
 
-        private static void GeneratePlayers(int numberOfPlayers, int goalAreaHeight)
+        private static void GenerateTeamLeader(int numberOfPlayers, int goalAreaHeight)
         {
-            for (; numberOfPlayers > 0; numberOfPlayers--)
+            var p = new Process
             {
-                var p = new Process
+                StartInfo =
                 {
-                    StartInfo =
-                    {
-                        Arguments = string.Concat( $"0", $"{numberOfPlayers}", $"{goalAreaHeight}"),
-                        FileName = @"..\..\..\Agent\bin\Debug\Agent.exe",
-                        CreateNoWindow = true,
-                        UseShellExecute = true
-                    }
-                };
-                p.Start();
-            }
+                    Arguments = string.Concat( $"0", $"{numberOfPlayers - 1}", $"{goalAreaHeight}"),
+                    FileName = @"..\..\..\Agent\bin\Debug\Agent.exe",
+                    CreateNoWindow = true,
+                    UseShellExecute = true
+                }
+            };
+            p.Start();
         }
 
         private static void DispatchToApp(Action action)
