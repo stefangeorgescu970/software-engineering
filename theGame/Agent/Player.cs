@@ -9,7 +9,6 @@ namespace Agent
     {
         Tuple<int, int> _position;
         public Team MyTeam;
-      
         public Player(int i, int j)
         {
             RegisterToServerAndGetId(ClientType.Agent);
@@ -53,13 +52,15 @@ namespace Agent
         }
         public override void HandleReceivePacket(Packet receivedPacket)
         {
-
+            
             if (receivedPacket.RequestType == RequestType.Register)
             {
                 SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
+                Console.WriteLine("Id is set for player : " + Id);
             }
             else
             {
+                Console.WriteLine("Went to else");
                 //TODO - handle something received from another entit
             }
         }

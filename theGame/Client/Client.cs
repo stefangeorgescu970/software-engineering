@@ -32,7 +32,7 @@ namespace Client
         private static ManualResetEvent sendDone = new ManualResetEvent(false);
         private static ManualResetEvent receiveDone = new ManualResetEvent(false);
 
-        protected int Id = -1;
+        public int Id = -1;
         private bool _isConnected = false;
 
         private Socket _mySocket;
@@ -45,11 +45,11 @@ namespace Client
                 //TODO handle case when the client does not manage to esablish connection to server
                 _isConnected = false;
             }
+          
         }
 
         protected void SetId(int id)
         {
-
             Id = id;
         }
 
@@ -89,12 +89,12 @@ namespace Client
                 }
                 catch (SocketException)
                 {
-                    Console.Clear();
+                    //Console.Clear();
                     Console.WriteLine("Connection Attempts: " + attempts);
                 }
             }
 
-            Console.Clear();
+         //   Console.Clear();
             if (_isConnected)
                 Console.WriteLine("Connected");
         }
@@ -135,7 +135,7 @@ namespace Client
                 StateObject state = (StateObject)asyncResult.AsyncState;
                 
                 Socket handler = state.workSocket;
-                
+                Console.WriteLine("packet received step 1111111");
                 // Read data from the client socket. 
                 int bytesRead = handler.EndReceive(asyncResult);
 
@@ -148,6 +148,7 @@ namespace Client
                     // more data.
                     content = state.sb.ToString();
                     int eofIndex = content.IndexOf(ServerConstants.endOfPacket, StringComparison.Ordinal);
+                    Console.WriteLine("packet received step 222222");
                     if (eofIndex > -1)
                     {
                         // All the data has been read from the 
@@ -156,14 +157,12 @@ namespace Client
                             content.Length, content);
                         
                         Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(content.Remove(eofIndex));
-                        
                         HandleReceivePacket(receivedPacket);
-
-                        StateObject newState = new StateObject();
-                        newState.workSocket = handler;  // adding socket to the new state
+                        Console.WriteLine("packet received step 3333333");
+                        state.sb.Clear();
                         handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize,
                             SocketFlags.None,
-                            new AsyncCallback(ReceiveMessage), newState);
+                            new AsyncCallback(ReceiveMessage), state);
                     }
                     else
                     {

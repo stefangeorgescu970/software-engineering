@@ -6,6 +6,7 @@ namespace Server
     /// </summary>
     public static class ServerConstants
     {
+
         /// <summary>
         /// The used port.
         /// </summary>
@@ -57,7 +58,14 @@ namespace Server
             /// The type of the sender string used.
             /// </summary>
             public const String SenderType = "SenderType";
-
+            /// <summary>
+            /// The type that tells game master to check status for a given cell
+            /// </summary>
+            public const String CheckMove = "CheckMove";
+            /// <summary>
+            /// The type that tells a player the status for a given cell
+            /// </summary>
+            public const String Move = "Move";
             // Those who implement agent and game master are free to add here whatever tags they will use.
 
         }
