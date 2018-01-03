@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Runtime.CompilerServices;
 using Server;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -39,7 +41,6 @@ namespace Agent
 
         public TeamLeader(int i, int j)
         {
-            TryConnect(5);
             RegisterToServerAndGetId(ClientType.Agent);
             location = new Tuple<int, int>(i, j);
             MyTeam = null;
@@ -51,7 +52,6 @@ namespace Agent
             MyTeam = new Team(new List<int>(), no_players);
             this.location = locaton;
             this.gameBoard = gameBoard;
-            TryConnect(5);
             RegisterToServerAndGetId(ClientType.Agent);
             Console.WriteLine($"TeamLeader initialized");
         }
@@ -120,7 +120,7 @@ namespace Agent
     }
     public class Player : Client.Client
     {
-	    Tuple<int, int> _position;
+        Tuple<int, int> _position;
         public Team MyTeam;
         private Tuple<int, int> location;
         private Board gameBoard;
@@ -128,7 +128,6 @@ namespace Agent
 
         public Player(int i, int j)
         {
-            TryConnect(5);
             RegisterToServerAndGetId(ClientType.Agent);
             _position = new Tuple<int, int>(i, j);
             MyTeam = null;
@@ -145,9 +144,12 @@ namespace Agent
             Console.WriteLine($"Player initialized");
         }
         
-        /* return a pair of the new position
-         * the method should test every possible position whether it is ocupied by other player or not, by asking the server about it
-        */
+        /// <summary>
+        /// return a pair of the new position, 
+        /// the method should test every possible position whether it is ocupied by other player or not, by asking the server about it
+        /// </summary>
+        /// <returns></returns>
+        
         public Tuple<int, int> Move()   
         {
             int []dx = {-1, 0, 1, 0};
@@ -164,10 +166,8 @@ namespace Agent
 
                     return new Tuple<int, int>(newX, newY);
                 }
-
             }
         }
-
 
         public override void HandleReceivePacket(Packet receivedPacket)
         {
@@ -179,8 +179,6 @@ namespace Agent
                 //TODO - handle something received from another entit
                 Console.WriteLine($"Player recieved packet ");
             }
-
-
         }
     }
 }

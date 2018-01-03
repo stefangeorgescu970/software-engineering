@@ -42,20 +42,22 @@ namespace Server
         /// Gets or sets the socket.
         /// </summary>
         /// <value>The socket.</value>
-        public Socket Socket { get => _mySocket; set => _mySocket = value; }
+        public Socket Socket { get { return _mySocket; }
+            set { _mySocket = value; } }
 
 
         /// <summary>
         /// Gets or sets the identifier.
         /// </summary>
         /// <value>The identifier.</value>
-        public int Id { get => _id; set => _id = value; }
+        public int Id { get { return _id; }
+            set { _id = value; } }
 
 
         /// <summary>
         /// Gets or sets the type of the connection.
         /// </summary>
         /// <value>The type of the connection.</value>
-        public ConnectionType ConnectionType { get => _myConnectionType; set => _myConnectionType = value; }
+        public ConnectionType ConnectionType { get { return _myConnectionType; } set  { _myConnectionType = value; } }
     }
 }

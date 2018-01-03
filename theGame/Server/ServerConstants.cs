@@ -6,6 +6,7 @@ namespace Server
     /// </summary>
     public static class ServerConstants
     {
+
         /// <summary>
         /// The used port.
         /// </summary>
@@ -20,7 +21,9 @@ namespace Server
         /// The size of the buffer. 
         /// Might increase depending on message formatting.
         /// </summary>
-        public const int BufferSize = 2048;
+        public const int ServerBufferSize = 1024;
+
+        public const int ClientBufferSize = 256;
 
         /// <summary>
         /// The first available player id.
@@ -37,6 +40,10 @@ namespace Server
         /// </summary>
         public const int MaximumNumberOfAttemtps = 5;
 
+        public const String endOfPacket = "<EOF>";
+
+        public const String tempHostName = "host.server.com";
+
         /// <summary>
         /// Argument names to use when adding parameters.
         /// </summary>
@@ -51,7 +58,14 @@ namespace Server
             /// The type of the sender string used.
             /// </summary>
             public const String SenderType = "SenderType";
-
+            /// <summary>
+            /// The type that tells game master to check status for a given cell
+            /// </summary>
+            public const String CheckMove = "CheckMove";
+            /// <summary>
+            /// The type that tells a player the status for a given cell
+            /// </summary>
+            public const String Move = "Move";
             // Those who implement agent and game master are free to add here whatever tags they will use.
 
         }
