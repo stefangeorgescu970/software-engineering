@@ -173,11 +173,11 @@ namespace Server
                     {
                         Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(packet);
 
-                        if (receivedPacket.RequestType == RequestType.Register)
+                        if (receivedPacket!=null && receivedPacket.RequestType == RequestType.Register)
                         {
                             HandleRegisterRequest(receivedPacket, handler);
                         }
-                        else if (receivedPacket.RequestType == RequestType.Send)
+                        else if (receivedPacket != null && receivedPacket.RequestType == RequestType.Send)
                         {
                             HandleSendRequest(receivedPacket);
                         }
