@@ -122,8 +122,32 @@ namespace Launcher
                 {
                     Console.WriteLine("Launching client");
                     // Use of dispatcher necessary as this is a cross-thread operation
-                    DispatchToApp(() =>
-                        new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth, boardHeight).Show());
+                    try
+                    {
+                        DispatchToApp(() =>
+                            new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth, boardHeight).Show());
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == "numberOfPlayers")
+                    {
+                        Console.WriteLine("Something wrong with number of players");
+                        return;
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == "goalAreaH")
+                    {
+                        Console.WriteLine("Something wrong with height of the goal area");
+                        return;
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == "boardW")
+                    {
+                        Console.WriteLine("Something wrong with board width");
+                        return;
+                    }
+                    catch (ArgumentException ex) when (ex.ParamName == "boardH")
+                    {
+                        Console.WriteLine("Something wrong with board height");
+                        return;
+                    }
+
                     GeneratePlayers(numberOfPlayers, goalAreaHeight);
                 }
                 // Press Esc to exit
@@ -164,32 +188,4 @@ namespace Launcher
         }
     }
 }
-                    Console.WriteLine("Launching client");
-                    // Use of dispatcher necessary as this is a cross-thread operation
-                    try
-                    {
-                        DispatchToApp(() =>
-                            new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth, boardHeight).Show());
-                    }
-                    catch (ArgumentException ex) when (ex.ParamName == "numberOfPlayers")
-                    {
-                        Console.WriteLine("Something wrong with number of players");
-                        return;
-                    }
-                    catch (ArgumentException ex) when (ex.ParamName == "goalAreaH")
-                    {
-                        Console.WriteLine("Something wrong with height of the goal area");
-                        return;
-                    }
-                    catch (ArgumentException ex) when (ex.ParamName == "boardW")
-                    {
-                        Console.WriteLine("Something wrong with board width");
-                        return;
-                    }
-                    catch (ArgumentException ex) when (ex.ParamName == "boardH")
-                    {
-                        Console.WriteLine("Something wrong with board height");
-                        return;
-                    }
                    
-                    GeneratePlayers(numberOfPlayers, goalAreaHeight);

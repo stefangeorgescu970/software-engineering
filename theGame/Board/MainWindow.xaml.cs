@@ -75,34 +75,34 @@ namespace Board
                 }
             }
 
-			Content = boardGrid;
+			return boardGrid;
 		}
 
-		
 
-	}
+
+	    /// <summary>
+	    /// check whether a cell is occupied or not
+	    /// </summary>
+	    /// <param name="i">index i</param>
+	    /// <param name="j">index j</param>
+	    /// <returns></returns>
+	    public bool IsOccupied(int i, int j)
+	    {
+	        return occupied[i, j];
+	    }
+	    /// <summary>
+	    /// check whether a cell has a piece or not
+	    /// </summary>
+	    /// <param name="i">row i</param>
+	    /// <param name="j">column j</param>
+	    /// <returns></returns>
+	    public bool IsPiece(int i, int j)
+	    {
+	        return pieaces[i, j];
+	    }
+
+    }
 }
 
-            }
-		    return boardGrid;
 
-		/// <summary>
-        /// check whether a cell is occupied or not
-        /// </summary>
-        /// <param name="i">index i</param>
-        /// <param name="j">index j</param>
-        /// <returns></returns>
-        public bool IsOccupied(int i, int j)
-        {
-            return occupied[i, j];
-        }
-        /// <summary>
-        /// check whether a cell has a piece or not
-        /// </summary>
-        /// <param name="i">row i</param>
-        /// <param name="j">column j</param>
-        /// <returns></returns>
-        public bool IsPiece(int i, int j)
-        {
-            return pieaces[i, j];
-        }
+		
