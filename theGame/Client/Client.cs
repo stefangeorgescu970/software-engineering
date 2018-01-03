@@ -159,11 +159,10 @@ namespace Client
                         Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(content.Remove(eofIndex));
                         HandleReceivePacket(receivedPacket);
                         Console.WriteLine("packet received step 3333333");
-                        StateObject newState = new StateObject();
-                        newState.workSocket = handler;  // adding socket to the new state
+                        state.sb.Clear();
                         handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize,
                             SocketFlags.None,
-                            new AsyncCallback(ReceiveMessage), newState);
+                            new AsyncCallback(ReceiveMessage), state);
                     }
                     else
                     {

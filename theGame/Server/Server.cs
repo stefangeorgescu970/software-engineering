@@ -151,6 +151,8 @@ namespace Server
                 // There  might be more data, so store the data received so far.
                 state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
 
+                
+
                 // Check for end-of-file tag. If it is not there, read 
                 // more data.
                 content = state.sb.ToString();
@@ -161,6 +163,8 @@ namespace Server
                     // client. Display it on the console.
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
                         content.Length, content);
+
+                    // TODO - split packets by EOF tag
 
                     Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(content.Remove(eofIndex));
 
@@ -173,12 +177,11 @@ namespace Server
                         HandleSendRequest(receivedPacket);
                     }
 
-                    StateObject newState = new StateObject();
-
-                    newState.workSocket = handler;      // adding socket to the new state
+                    state.sb.Clear();
+                
 
                     handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
- new AsyncCallback(ReceiveMessage), newState);
+ new AsyncCallback(ReceiveMessage), state);
                 }
                 else
                 {
@@ -187,6 +190,7 @@ namespace Server
                                          new AsyncCallback(ReceiveMessage), state);
                 }
             }
+
         }
 
         private static void Send(Socket handler, String data)
@@ -304,6 +308,8 @@ namespace Server
 
             if (destinationClientIndex != -1)
             {
+                Console.WriteLine("Sending packet to "+ MyClients[destinationClientIndex].Id);
+
                 Socket destinationSocket = MyClients[destinationClientIndex].Socket;
                 ForwardToClient(packet, destinationSocket);
 

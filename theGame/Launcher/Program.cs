@@ -35,17 +35,16 @@ namespace Launcher
             else
             {
                 Console.WriteLine("went to else!");
-                var value = receivedPacket.Arguments[ServerConstants.ArgumentNames.CheckMove];
-                if (value != null)
-                {
-                    Tuple<int, int> idx = value as Tuple<int, int>;
-                    int destId = receivedPacket.Arguments[ServerConstants.ArgumentNames.Id];
-                    Packet response = new Packet(Id, destId, RequestType.Send);
-                    // return the status of the given cell
-                    response.AddArgument(ServerConstants.ArgumentNames.Move, new Tuple<bool, bool>(board.IsOccupied(idx.Item1, idx.Item2), board.IsPiece(idx.Item1, idx.Item2));
-                    SendPacket(new Packet(Id, destId, RequestType.Send));
-                    
-                }
+                //var value = receivedPacket.Arguments[ServerConstants.ArgumentNames.CheckMove];
+                //if (value != null)
+                //{
+                //    Tuple<int, int> idx = value as Tuple<int, int>;
+                //    int destId = receivedPacket.Arguments[ServerConstants.ArgumentNames.Id];
+                //    Packet response = new Packet(Id, destId, RequestType.Send);
+                //    // return the status of the given cell
+                //    response.AddArgument(ServerConstants.ArgumentNames.Move, new Tuple<bool, bool>(board.IsOccupied(idx.Item1, idx.Item2), board.IsPiece(idx.Item1, idx.Item2)));
+                //    SendPacket(response);
+                //}
                 //TODO - handle something received from another entit
             }
         }
@@ -56,6 +55,7 @@ namespace Launcher
         private static Application _app;
         private static void Main()
         {
+            
             // create the master
             GameMaster master = new GameMaster();
             // wait for master id to be assigned
