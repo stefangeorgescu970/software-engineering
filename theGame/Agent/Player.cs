@@ -5,6 +5,7 @@ using Server;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Agent
 {
@@ -28,16 +29,17 @@ namespace Agent
             GoalAreaHeight = goalAreaHeight;
         }
 
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public int GoalAreaHeight { get; set; }
-        
+        private int Width { get; set; }
+        private int Height { get; set; }
+        private int GoalAreaHeight { get; set; }
+
     }
     public class TeamLeader : Client.Client
     {
         public Team MyTeam;
         private Tuple<int, int> location;
         private Board gameBoard;
+        private int gameMasterId;
 
         public TeamLeader(int i, int j)
         {
@@ -85,18 +87,34 @@ namespace Agent
         {
             if (receivedPacket.RequestType == RequestType.Register)
             {
-                Console.WriteLine($"response is there");
                 SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
                 Console.WriteLine($"TeamLeader id set to {Id}");
 
                 for (var i = MyTeam.NumberOfPlayers; i > 0; i--)
                     CreateTeamMember(GetId());
+                
+                gameMasterId = int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.GameMasterId]);
+
+                var askForBoard = new Packet(GetId(), gameMasterId, RequestType.Send);
+                askForBoard.AddArgument(ServerConstants.ArgumentNames.GameBoardSize, "0");
+                SendPacket(askForBoard);
             }
             else
             {
-                int senderId = receivedPacket.SenderId;
-                MyTeam.PlayersIds.Add(senderId);
-                Console.WriteLine($"Player with id {senderId} added to team");
+                if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.RegisterToTeamLeader))
+                {
+                    var k = receivedPacket.Arguments[ServerConstants.ArgumentNames.RegisterToTeamLeader];
+                    int senderId = receivedPacket.SenderId;
+                    MyTeam.PlayersIds.Add(senderId);
+                    Console.WriteLine($"Player with id {senderId} added to team");
+                }
+
+                if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.GameBoardSize))
+                {
+                    var k = receivedPacket.Arguments[ServerConstants.ArgumentNames.GameBoardSize];
+                    gameBoard = new Board((int)k.Width, (int)k.Height, (int)k.GoalAreaHeight);
+                    Console.WriteLine($"game board of size {k.Width}x{k.Height}x{k.GoalAreaHeight} added to {GetId()}");
+                }
             }
 
 
@@ -125,6 +143,7 @@ namespace Agent
         private Tuple<int, int> location;
         private Board gameBoard;
         private int teamLeaderId;
+        private int gameMasterId;
 
         public Player(int i, int j)
         {
@@ -172,12 +191,30 @@ namespace Agent
         public override void HandleReceivePacket(Packet receivedPacket)
         {
             if(receivedPacket.RequestType == RequestType.Register) {
+
                 SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
-                Console.WriteLine($"Player id set to {Id}");
-                SendPacket(new Packet(GetId(), teamLeaderId, RequestType.Send));
+                Console.WriteLine($"Player ID set to {Id}");
+                gameMasterId = int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.GameMasterId]);
+
+                var joinTeam = new Packet(GetId(), teamLeaderId, RequestType.Send);
+                joinTeam.AddArgument(ServerConstants.ArgumentNames.RegisterToTeamLeader, GetId().ToString());
+                SendPacket(joinTeam);
+
+                var askForBoard = new Packet(GetId(), gameMasterId, RequestType.Send);
+                askForBoard.AddArgument(ServerConstants.ArgumentNames.GameBoardSize, "0");
+                SendPacket(askForBoard);
+
             } else {
                 //TODO - handle something received from another entit
-                Console.WriteLine($"Player recieved packet ");
+                if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.GameBoardSize))
+                {
+                    var k = receivedPacket.Arguments[ServerConstants.ArgumentNames.GameBoardSize];
+                    gameBoard = new Board((int)k.Width, (int)k.Height, (int)k.GoalAreaHeight);
+                    Console.WriteLine($"game board of size {k.Width}x{k.Height}x{k.GoalAreaHeight} added to {GetId()}");
+                } else
+                {
+                    Console.WriteLine($"Player recieved packet ");
+                }
             }
         }
     }

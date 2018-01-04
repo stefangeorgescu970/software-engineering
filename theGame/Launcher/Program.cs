@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows;
 using Board;
 using Server;
+using Newtonsoft.Json;
 
 namespace Launcher
 {
@@ -17,6 +18,22 @@ namespace Launcher
     /// </summary>
     public class GameMaster : Client.Client
     {
+
+        public class gameBoard
+        {
+            public gameBoard(int width, int height, int goalAreaHeight)
+            {
+                Width = width;
+                Height = height;
+                GoalAreaHeight = goalAreaHeight;
+            }
+
+            public int Width { get; set; }
+            public int Height { get; set; }
+            public int GoalAreaHeight { get; set; }
+
+        }
+
         /// <summary>
         /// The board that game master see
         /// </summary>
@@ -36,6 +53,15 @@ namespace Launcher
             else
             {
                 Console.WriteLine("went to else!");
+
+                if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.GameBoardSize))
+                {
+                    var returnBoard = new Packet(GetId(), receivedPacket.SenderId, RequestType.Send);
+                    string p = JsonConvert.SerializeObject(new gameBoard(10, 10, 2));
+                    returnBoard.AddArgument(ServerConstants.ArgumentNames.GameBoardSize, new gameBoard(10, 10, 2));
+                    SendPacket(returnBoard);
+                }
+
                 //var value = receivedPacket.Arguments[ServerConstants.ArgumentNames.CheckMove];
                 //if (value != null)
                 //{
@@ -58,13 +84,13 @@ namespace Launcher
         {
             
             // create the master
-            //GameMaster master = new GameMaster();
+            GameMaster master = new GameMaster();
             // wait for master id to be assigned
-            //while (master.Id == -1) ;
-            //Console.WriteLine("master id " + master.Id + " is ready");
+            while (master.Id == -1) ;
+            Console.WriteLine("master id " + master.Id + " is ready");
             //Packet toSend = new Packet(master.Id, master.Id, RequestType.Send);
             // toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, ClientType.GameMaster);
-            //master.SendPacket(toSend);
+            //master.SendPacket(toSend);    
 
             int numberOfPlayers, goalAreaHeight, boardWidth, boardHeight;
            
