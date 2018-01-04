@@ -35,7 +35,7 @@ namespace Server
         /// <summary>
         /// The current available identifier for players.
         /// </summary>
-        private static int _currentAvailableIdForPlayers = ServerConstants.PlayerIdPoolStart;
+        private static int _currentAvailableIdForClients = ServerConstants.PlayerIdPoolStart;
         /// <summary>
         /// List of clients.
         /// </summary>
@@ -111,6 +111,7 @@ namespace Server
 
             // Create the state object.
             StateObject state = new StateObject();
+
             state.workSocket = handler;
 
             handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
@@ -148,6 +149,7 @@ namespace Server
 
             if (bytesRead > 0)
             {
+                
                 // There  might be more data, so store the data received so far.
                 state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
 
@@ -168,7 +170,6 @@ namespace Server
 
                     String[] packets = content.Split(stringSeparators, StringSplitOptions.None);
 
-
                     foreach (String packet in packets) 
                     {
                         Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(packet);
@@ -181,13 +182,16 @@ namespace Server
                         {
                             HandleSendRequest(receivedPacket);
                         }
+                        else if (receivedPacket != null && receivedPacket.RequestType == RequestType.ConnectToGame)
+                        {
+                            HandleConnectToGameRequest(receivedPacket);
+                        }
+
                     }
 
                     state.sb.Clear();
-                
-
-                    handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
- new AsyncCallback(ReceiveMessage), state);
+               
+                    handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None, new AsyncCallback(ReceiveMessage), state);
                 }
                 else
                 {
@@ -238,7 +242,7 @@ namespace Server
                         myMutex.WaitOne();
                         try
                         {
-                            _currentAvailableIdForPlayers++;
+                            _currentAvailableIdForClients++;
                         }
                         finally
                         {
@@ -246,13 +250,14 @@ namespace Server
                         }
 
 
-                     int allocatedId = _currentAvailableIdForPlayers++;
+                     int allocatedId = _currentAvailableIdForClients;
 
                         foreach (var clientData in MyClients)
                         {
                             if (clientData.Socket != senderSocket) continue;
 
                             clientData.Id = allocatedId;
+                            clientData.ClientType = ClientType.Agent;
                             clientData.ConnectionType = ConnectionType.Connected;
                             break;
                         }
@@ -261,12 +266,24 @@ namespace Server
                     }
                 case ClientType.GameMaster:
                     {
-                        int allocatedId = 0;
+                        myMutex.WaitOne();
+                        try
+                        {
+                            _currentAvailableIdForClients++;
+                        }
+                        finally
+                        {
+                            myMutex.ReleaseMutex();
+                        }
+
+
+                        int allocatedId = _currentAvailableIdForClients;
 
                         foreach (var clientData in MyClients)
                         {
                             if (clientData.Socket != senderSocket) continue;
                             clientData.Id = allocatedId;
+                            clientData.ClientType = ClientType.GameMaster;
                             clientData.ConnectionType = ConnectionType.Connected;
                             break;
                         }
@@ -282,7 +299,7 @@ namespace Server
         }
 
         /// <summary>
-        /// Sends the allocated id back to the client.
+        /// Returns the index of the sought client in the data.
         /// </summary>
         /// <returns>The index of destination in clients.</returns>
         /// <param name="destinationId">Destination identifier.</param>
@@ -357,6 +374,14 @@ namespace Server
             jsonString += ServerConstants.endOfPacket;
 
             Send(senderSocket, jsonString);
+        }
+
+        // MARK - HANDLE CONNECT TO GAME MASTER REQUEST
+
+        private static void HandleConnectToGameRequest(Packet receivedPacket)
+        {
+            throw new NotImplementedException();
+            // TODO - how to make server wait for a response before sending request to another game master?
         }
 
         public static void Main(string[] args)

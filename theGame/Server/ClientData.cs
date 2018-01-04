@@ -26,6 +26,8 @@ namespace Server
         /// </summary>
         private ConnectionType _myConnectionType;
 
+        private ClientType _clientType;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Server.ClientData"/> class.
@@ -59,5 +61,7 @@ namespace Server
         /// </summary>
         /// <value>The type of the connection.</value>
         public ConnectionType ConnectionType { get { return _myConnectionType; } set  { _myConnectionType = value; } }
+
+        public ClientType ClientType { get => _clientType; set => _clientType = value; }
     }
 }

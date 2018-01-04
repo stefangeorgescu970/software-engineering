@@ -8,7 +8,7 @@
     /// </summary>
     public enum RequestType
     {
-        Register, Send
+        Register, Send, ConnectToGame
 
     }
 }
