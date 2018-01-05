@@ -380,6 +380,8 @@ namespace Server
 
         // MARK - HANDLE CONNECT TO GAME MASTER REQUEST
 
+        private static readonly Mutex isConnecting = new Mutex();
+
         private static void HandleConnectToGameRequest(Packet receivedPacket)
         {
 
@@ -395,12 +397,17 @@ namespace Server
 
                         foreach (var clientData in MyClients)
                         {
+                            isConnecting.WaitOne();
+
                             if (clientData.ClientType == ClientType.GameMaster && clientData.NumberOfSpotsAvailable > 0)
                             {
+                                
+                                clientData.NumberOfSpotsAvailable--;
 
                                 Packet forAgent = new Packet(-1, idAgentTryingToConnect, RequestType.ConnectToGame);
                                 forAgent.AddArgument("GameMasterId", clientData.Id);
                                 forAgent.AddArgument("DidFindGame", true);
+
 
                                 Packet forGameMaster = new Packet(-1, clientData.Id, RequestType.ConnectToGame);
                                 forGameMaster.AddArgument("NewPlayerId", idAgentTryingToConnect);
@@ -409,10 +416,16 @@ namespace Server
                                 HandleSendRequest(forGameMaster);
 
                                 didFindGame = true;
+
+                                isConnecting.ReleaseMutex();
+
                                 break;
                             }
 
+                            isConnecting.ReleaseMutex();
+
                         }
+
 
                         if(!didFindGame) {
                             Packet forAgent = new Packet(-1, idAgentTryingToConnect, RequestType.ConnectToGame);
