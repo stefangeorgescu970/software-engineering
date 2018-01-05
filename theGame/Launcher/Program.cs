@@ -24,7 +24,7 @@ namespace Launcher
        
         public GameMaster()
         {
-            RegisterToServerAndGetId(ClientType.GameMaster);
+            RegisterToServerAndGetId(ClientType.GameMaster); // TODO FOR OLA - here game master should have a maximum number of players, just add that as second argument
         }
         public override void HandleReceivePacket(Packet receivedPacket)
         {
