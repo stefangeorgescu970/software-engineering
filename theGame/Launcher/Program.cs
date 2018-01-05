@@ -22,9 +22,9 @@ namespace Launcher
         /// </summary>
         public MainWindow board { get; set; }
        
-        public GameMaster()
+        public GameMaster(int maxNoOfPlayers)
         {
-            RegisterToServerAndGetId(ClientType.GameMaster); // TODO FOR OLA - here game master should have a maximum number of players, just add that as second argument
+            RegisterToServerAndGetId(ClientType.GameMaster, maxNoOfPlayers); 
         }
         public override void HandleReceivePacket(Packet receivedPacket)
         {
@@ -57,15 +57,7 @@ namespace Launcher
         private static void Main()
         {
             
-            // create the master
-            GameMaster master = new GameMaster();
-            // wait for master id to be assigned
-            while (master.Id == -1) ;
-            Console.WriteLine("master id " + master.Id + " is ready");
-            Packet toSend = new Packet(master.Id, master.Id, RequestType.Send);
-            // toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, ClientType.GameMaster);
-            master.SendPacket(toSend);
-
+            
             int numberOfPlayers, goalAreaHeight, boardWidth, boardHeight;
            
             Console.WriteLine("Number of players:");
@@ -97,6 +89,16 @@ namespace Launcher
                 while (!int.TryParse(Console.ReadLine(), out goalAreaHeight))
                     Console.WriteLine("\t Please enter an integer");
             }
+
+            // create the master
+            GameMaster master = new GameMaster(numberOfPlayers);
+            // wait for master id to be assigned
+            while (master.Id == -1) ;
+            Console.WriteLine("master id " + master.Id + " is ready");
+            Packet toSend = new Packet(master.Id, master.Id, RequestType.Send);
+            // toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, ClientType.GameMaster);
+            master.SendPacket(toSend);
+
 
 
             Console.WriteLine("Press \"Enter\" to start client, \"Esc\" to close it");
