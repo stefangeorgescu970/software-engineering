@@ -65,5 +65,8 @@ namespace Server
         public ConnectionType ConnectionType { get { return _myConnectionType; } set  { _myConnectionType = value; } }
 
         public ClientType ClientType { get => _clientType; set => _clientType = value; }
+
+        // Will be used just for game master
+        public int NumberOfSpotsAvailable { get => _numberOfSpotsAvailable; set => _numberOfSpotsAvailable = value; }
     }
 }
