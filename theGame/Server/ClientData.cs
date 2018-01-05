@@ -28,6 +28,8 @@ namespace Server
 
         private ClientType _clientType;
 
+        private int _numberOfSpotsAvailable;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Server.ClientData"/> class.

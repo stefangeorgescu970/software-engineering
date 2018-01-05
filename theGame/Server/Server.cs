@@ -278,11 +278,13 @@ namespace Server
 
 
                         int allocatedId = _currentAvailableIdForClients;
+                        int availablePlayers = (int)packet.Arguments["NumberOfPlayersForGame"];
 
                         foreach (var clientData in MyClients)
                         {
                             if (clientData.Socket != senderSocket) continue;
                             clientData.Id = allocatedId;
+                            clientData.NumberOfSpotsAvailable = availablePlayers;
                             clientData.ClientType = ClientType.GameMaster;
                             clientData.ConnectionType = ConnectionType.Connected;
                             break;
@@ -380,8 +382,60 @@ namespace Server
 
         private static void HandleConnectToGameRequest(Packet receivedPacket)
         {
-            throw new NotImplementedException();
-            // TODO - how to make server wait for a response before sending request to another game master?
+
+            ClientType clientType = (ClientType)((int)receivedPacket.Arguments[ServerConstants.ArgumentNames.SenderType]);
+
+            switch (clientType)
+            {
+                case ClientType.Agent:
+                    {
+                        int idAgentTryingToConnect = receivedPacket.SenderId;
+
+                        bool didFindGame = false;
+
+                        foreach (var clientData in MyClients)
+                        {
+                            if (clientData.ClientType == ClientType.GameMaster && clientData.NumberOfSpotsAvailable > 0)
+                            {
+
+                                Packet forAgent = new Packet(-1, idAgentTryingToConnect, RequestType.ConnectToGame);
+                                forAgent.AddArgument("GameMasterId", clientData.Id);
+                                forAgent.AddArgument("DidFindGame", true);
+
+                                Packet forGameMaster = new Packet(-1, clientData.Id, RequestType.ConnectToGame);
+                                forGameMaster.AddArgument("NewPlayerId", idAgentTryingToConnect);
+
+                                HandleSendRequest(forAgent);
+                                HandleSendRequest(forGameMaster);
+
+                                didFindGame = true;
+                                break;
+                            }
+
+                        }
+
+                        if(!didFindGame) {
+                            Packet forAgent = new Packet(-1, idAgentTryingToConnect, RequestType.ConnectToGame);
+                            forAgent.AddArgument("DidFindGame", false);
+                        }
+
+                        break;
+                    }
+                case ClientType.GameMaster:
+                    {
+                        int sendingGameMasterId = receivedPacket.SenderId;
+                        int indexInClientsList = GetIndexOfDestinationInClients(sendingGameMasterId);
+
+                        int newNumberOfPlayers = (int)receivedPacket.Arguments["UpdatedNumberOfPlayers"];
+
+                        MyClients[indexInClientsList].NumberOfSpotsAvailable = newNumberOfPlayers;
+
+                        break;
+                    }
+                default:
+                    Console.WriteLine("Invalid request received, do nothing.");
+                    break;
+            }
         }
 
         public static void Main(string[] args)
