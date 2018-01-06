@@ -66,6 +66,18 @@ namespace Server
             /// The type that tells a player the status for a given cell
             /// </summary>
             public const String Move = "Move";
+            /// <summary>
+            /// The identifier for game master
+            /// </summary>
+            public const String GameMasterId = "GameMasterId";
+            /// <summary>
+            /// The type to exchange board width, height and goal area width
+            /// </summary>
+            public const String GameBoardSize = "GameBoardSize";
+            /// <summary>
+            /// The type to register player to team leader
+            /// </summary>
+            public const String RegisterToTeamLeader = "RegisterToTeamLeader";
             // Those who implement agent and game master are free to add here whatever tags they will use.
 
         }

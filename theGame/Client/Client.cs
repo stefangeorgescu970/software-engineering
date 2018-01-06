@@ -52,6 +52,10 @@ namespace Client
         {
             Id = id;
         }
+        protected int GetId()
+        {
+            return Id;
+        }
 
         public void TryConnect(int maximumAttempts)
         {

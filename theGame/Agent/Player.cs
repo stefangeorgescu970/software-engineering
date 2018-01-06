@@ -2,23 +2,53 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 using Server;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace Agent
 {
+    public class Team
+    {
+        public Team(List<int> playersIds, int numberOfPlayers)
+        {
+            PlayersIds = playersIds;
+            NumberOfPlayers = numberOfPlayers;
+        }
+
+        public List<int> PlayersIds { get; set; }
+        public int NumberOfPlayers { get; set; }
+    }
+    public class Board
+    {
+        public Board(int width, int height, int goalAreaHeight)
+        {
+            Width = width;
+            Height = height;
+            GoalAreaHeight = goalAreaHeight;
+        }
+
+        private int Width { get; set; }
+        private int Height { get; set; }
+        private int GoalAreaHeight { get; set; }
+
+    }
+
     public class Player : Client.Client
     {
-        Tuple<int, int> _position;
         public Team MyTeam;
-        public Player(int i, int j)
+        private Tuple<int, int> location;
+        private Board gameBoard;
+        private int teamLeaderId;
+        private int gameMasterId;
+
+        public Player(Tuple<int, int> location, Board gameBoard)
         {
+            this.location = location;
+            this.gameBoard = gameBoard;
             RegisterToServerAndGetId(ClientType.Agent);
-            _position = new Tuple<int, int>(i, j);
-            MyTeam = null;
-            Console.WriteLine($"Player with id: {Id}, initialized on location x: {i} y: {j}");
-        }
-        public void SetTeam(Team myTeam)
-        {
-            MyTeam = myTeam;
+            Console.WriteLine($"Player initialized");
         }
 
         /// <summary>
@@ -35,33 +65,42 @@ namespace Agent
             while (true)
             {
                 int idx = r.Next(4);
-                int newX = _position.Item1 + dx[idx];
-                int newY = _position.Item2 + dy[idx];
+                int newX = location.Item1 + dx[idx];
+                int newY = location.Item2 + dy[idx];
                 if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10/* && (newX, newY) are not ocupied */ ) // 10 should subtituted by the board size
                 {
-                    _position = new Tuple<int, int>(newX, newY);
+                    location = new Tuple<int, int>(newX, newY);
 
                     return new Tuple<int, int>(newX, newY);
                 }
             }
         }
 
-        public int getId()
-        {
-            return Id;
-        }
         public override void HandleReceivePacket(Packet receivedPacket)
         {
-            
-            if (receivedPacket.RequestType == RequestType.Register)
+            switch (receivedPacket.RequestType)
             {
-                SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
-                Console.WriteLine("Id is set for player : " + Id);
-            }
-            else
-            {
-                Console.WriteLine("Went to else");
-                //TODO - handle something received from another entit
+                case RequestType.Register:
+                    SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
+                    Console.WriteLine($"Player ID set to {Id}");
+                    var connetToGame = new Packet(Id, -1, RequestType.ConnectToGame);
+                    connetToGame.AddArgument(ServerConstants.ArgumentNames.SenderType, ClientType.Agent);
+                    SendPacket(connetToGame);
+                    break;
+                case RequestType.Send:
+                    if (receivedPacket.Arguments.ContainsKey("TeamLeaderId") && receivedPacket.SenderId == gameMasterId)
+                    {
+                        teamLeaderId = (int)receivedPacket.Arguments["TeamLeaderId"];
+                        Console.WriteLine($"Player: {Id} received Team Leader's id: {teamLeaderId} ");
+                    }
+                    break;
+                case RequestType.ConnectToGame:
+                    gameMasterId = (int)receivedPacket.Arguments[ServerConstants.ArgumentNames.GameMasterId];
+                    Console.WriteLine($"Player: {Id} received Game Master's id: {gameMasterId} ");
+                    break;
+                default:
+                    Console.WriteLine("Player received packet of unknown type, do nothing");
+                    break;
             }
         }
     }

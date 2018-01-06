@@ -5,17 +5,28 @@ using System.Windows.Media;
 
 namespace Board
 {
-	/// <summary>
-	/// Interaction logic for MainWindow.xaml
-	/// </summary>
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public class gameBoard
+    {
+        public gameBoard(int width, int height, int goalAreaHeight)
+        {
+            Width = width;
+            Height = height;
+            GoalAreaHeight = goalAreaHeight;
+        }
 
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public int GoalAreaHeight { get; set; }
 
-	public partial class MainWindow
+    }
+
+    public partial class MainWindow
 	{
 		public int PlayerNumber { get; set; }
-		public int GoalHeight { get; set; }
-		public int BoardWidth { get; set; }
-		public int BoardHeight { get; set; }
+        public gameBoard gameBoard;
         /// <summary>
         /// bool 2d array tells whether a cell is occupied by a player or not
         /// </summary>
@@ -36,9 +47,7 @@ namespace Board
 		        throw new ArgumentException("Board height zero", nameof(boardH));
 
             PlayerNumber = numberOfPlayers;
-			GoalHeight = goalAreaH;
-			BoardWidth = boardW;
-			BoardHeight = boardH;
+            gameBoard = new gameBoard(boardW, boardH, goalAreaH);
 			InitializeComponent();
             Content = CreateBoard();
         }
@@ -51,14 +60,14 @@ namespace Board
 				Background = Brushes.Beige
 			};
 
-			for (int i = 0; i < BoardWidth; i++)
+			for (int i = 0; i < gameBoard.Width; i++)
 				boardGrid.ColumnDefinitions.Add(new ColumnDefinition());
-			for (int i = 0; i < BoardHeight; i++)
+			for (int i = 0; i < gameBoard.Height; i++)
 				boardGrid.RowDefinitions.Add(new RowDefinition());
 
-            for (int i = 0; i < BoardWidth; i++)
+            for (int i = 0; i < gameBoard.Width; i++)
             {
-                for (int j = 0; j < BoardHeight; j++)
+                for (int j = 0; j < gameBoard.Height; j++)
                 {
                     Border border = new Border
                     {
@@ -66,7 +75,7 @@ namespace Board
                         BorderThickness = new Thickness(1)
                     };
 
-                    if (j < GoalHeight || j >= (BoardHeight - GoalHeight))
+                    if (j < gameBoard.GoalAreaHeight || j >= (gameBoard.Height - gameBoard.GoalAreaHeight))
                         border.BorderBrush = Brushes.DarkGray;
 
                     Grid.SetColumn(border, i);
