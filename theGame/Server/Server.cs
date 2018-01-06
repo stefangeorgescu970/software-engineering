@@ -40,7 +40,6 @@ namespace Server
         /// List of clients.
         /// </summary>
         private static readonly List<ClientData> MyClients = new List<ClientData>(); // Updated list of clients to serve
-        private static readonly List<int> MyGameMasters = new List<int>(); // Updated list of clients to serve
         private static readonly Mutex myMutex = new Mutex();
 
         /// <summary>
@@ -288,7 +287,6 @@ namespace Server
                             clientData.NumberOfSpotsAvailable = availablePlayers;
                             clientData.ClientType = ClientType.GameMaster;
                             clientData.ConnectionType = ConnectionType.Connected;
-                            MyGameMasters.Add(allocatedId);
                             break;
                         }
 
@@ -372,11 +370,6 @@ namespace Server
             Packet toSend = new Packet(-1, allocatedId, RequestType.Register);
 
             toSend.AddArgument(ServerConstants.ArgumentNames.Id, allocatedId.ToString());
-            //TODO: look for smarter way to assign gamemasters
-            if (!MyGameMasters.Contains(allocatedId))
-            {
-                toSend.AddArgument(ServerConstants.ArgumentNames.GameMasterId, MyGameMasters[0].ToString());
-            }
 
             String jsonString = JsonConvert.SerializeObject(toSend);
 

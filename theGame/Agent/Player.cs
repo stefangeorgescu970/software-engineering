@@ -78,32 +78,29 @@ namespace Agent
 
         public override void HandleReceivePacket(Packet receivedPacket)
         {
-            if(receivedPacket.RequestType == RequestType.Register) {
-
-                SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
-                Console.WriteLine($"Player ID set to {Id}");
-
-                gameMasterId = int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.GameMasterId]);
-
-                var joinTeam = new Packet(GetId(), teamLeaderId, RequestType.Send);
-                joinTeam.AddArgument(ServerConstants.ArgumentNames.RegisterToTeamLeader, GetId().ToString());
-                SendPacket(joinTeam);
-
-                var askForBoard = new Packet(GetId(), gameMasterId, RequestType.Send);
-                askForBoard.AddArgument(ServerConstants.ArgumentNames.GameBoardSize, "0");
-                SendPacket(askForBoard);
-
-            } else {
-                //TODO - handle something received from another entit
-                if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.GameBoardSize))
-                {
-                    var k = receivedPacket.Arguments[ServerConstants.ArgumentNames.GameBoardSize];
-                    gameBoard = new Board((int)k.Width, (int)k.Height, (int)k.GoalAreaHeight);
-                    Console.WriteLine($"game board of size {k.Width}x{k.Height}x{k.GoalAreaHeight} added to {GetId()}");
-                } else
-                {
-                    Console.WriteLine($"Player recieved packet ");
-                }
+            switch (receivedPacket.RequestType)
+            {
+                case RequestType.Register:
+                    SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
+                    Console.WriteLine($"Player ID set to {Id}");
+                    var connetToGame = new Packet(Id, -1, RequestType.ConnectToGame);
+                    connetToGame.AddArgument(ServerConstants.ArgumentNames.SenderType, ClientType.Agent);
+                    SendPacket(connetToGame);
+                    break;
+                case RequestType.Send:
+                    if (receivedPacket.Arguments.ContainsKey("TeamLeaderId") && receivedPacket.SenderId == gameMasterId)
+                    {
+                        teamLeaderId = (int)receivedPacket.Arguments["TeamLeaderId"];
+                        Console.WriteLine($"Player: {Id} received Team Leader's id: {teamLeaderId} ");
+                    }
+                    break;
+                case RequestType.ConnectToGame:
+                    gameMasterId = (int)receivedPacket.Arguments[ServerConstants.ArgumentNames.GameMasterId];
+                    Console.WriteLine($"Player: {Id} received Game Master's id: {gameMasterId} ");
+                    break;
+                default:
+                    Console.WriteLine("Received packet of unknown type, do nothing");
+                    break;
             }
         }
     }
