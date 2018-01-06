@@ -7,6 +7,10 @@ using Newtonsoft.Json;
 using Server;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using Board;
 
 namespace Client
 {
@@ -14,13 +18,13 @@ namespace Client
     public class StateObject
     {
         // Client socket.
-        public Socket workSocket = null;
+        public Socket WorkSocket = null;
         // Size of receive buffer.
         public const int BufferSize = ServerConstants.ClientBufferSize;
         // Receive buffer.
-        public byte[] buffer = new byte[BufferSize];
+        public byte[] Buffer = new byte[BufferSize];
         // Received data string.
-        public StringBuilder sb = new StringBuilder();
+        public StringBuilder Sb = new StringBuilder();
     }
 
 
@@ -28,12 +32,18 @@ namespace Client
     {
 
         // ManualResetEvent instances signal completion.
-        private static ManualResetEvent connectDone = new ManualResetEvent(false);
-        private static ManualResetEvent sendDone = new ManualResetEvent(false);
-        private static ManualResetEvent receiveDone = new ManualResetEvent(false);
+        private static ManualResetEvent _connectDone = new ManualResetEvent(false);
+        private static ManualResetEvent _sendDone = new ManualResetEvent(false);
+        private static ManualResetEvent _receiveDone = new ManualResetEvent(false);
 
         public int Id = -1;
         private bool _isConnected = false;
+
+        /// <summary>
+        /// Baord of each individual client
+        /// </summary>
+
+        public Grid Board = new Grid();
 
         private Socket _mySocket;
 
@@ -65,16 +75,16 @@ namespace Client
             {
                 try
                 {
-                    IPEndPoint remoteEP = new IPEndPoint(IPAddress.Loopback, ServerConstants.UsedPort);
+                    IPEndPoint remoteEp = new IPEndPoint(IPAddress.Loopback, ServerConstants.UsedPort);
                     
                     // Create a TCP/IP socket.
                     Socket client = new Socket(AddressFamily.InterNetwork,
                         SocketType.Stream, ProtocolType.Tcp);
                     
                     // Connect to the remote endpoint.
-                    client.BeginConnect(remoteEP,
+                    client.BeginConnect(remoteEp,
                         new AsyncCallback(ConnectCallback), client);
-                    connectDone.WaitOne();
+                    _connectDone.WaitOne();
 
                     System.Threading.Thread.Sleep(2000); // fix for mac which sent requests really quickly
                     attempts++;
@@ -84,11 +94,10 @@ namespace Client
 
 
                     // Create the state object.
-                    StateObject state = new StateObject();
-                    state.workSocket = client;
-                    
+                    StateObject state = new StateObject {WorkSocket = client};
+
                     // Begin receiving the data from the remote device.
-                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                    client.BeginReceive(state.Buffer, 0, StateObject.BufferSize, 0,
                                         new AsyncCallback(ReceiveMessage), state);
                 }
                 catch (SocketException)
@@ -117,7 +126,7 @@ namespace Client
                     client.RemoteEndPoint.ToString());
                 
                 // Signal that the connection has been made.
-                connectDone.Set();
+                _connectDone.Set();
             }
             catch (Exception e)
             {
@@ -138,7 +147,7 @@ namespace Client
                 // from the asynchronous state object.
                 StateObject state = (StateObject)asyncResult.AsyncState;
                 
-                Socket handler = state.workSocket;
+                Socket handler = state.WorkSocket;
                 Console.WriteLine("packet received step 1111111");
                 // Read data from the client socket. 
                 int bytesRead = handler.EndReceive(asyncResult);
@@ -146,11 +155,11 @@ namespace Client
                 if (bytesRead > 0)
                 {
                     // There  might be more data, so store the data received so far.
-                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                    state.Sb.Append(Encoding.ASCII.GetString(state.Buffer, 0, bytesRead));
                     
                     // Check for end-of-file tag. If it is not there, read 
                     // more data.
-                    content = state.sb.ToString();
+                    content = state.Sb.ToString();
                     int eofIndex = content.IndexOf(ServerConstants.endOfPacket, StringComparison.Ordinal);
                     Console.WriteLine("packet received step 222222");
                     if (eofIndex > -1)
@@ -163,15 +172,15 @@ namespace Client
                         Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(content.Remove(eofIndex));
                         HandleReceivePacket(receivedPacket);
                         Console.WriteLine("packet received step 3333333");
-                        state.sb.Clear();
-                        handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize,
+                        state.Sb.Clear();
+                        handler.BeginReceive(state.Buffer, ServerConstants.BufferOffset, StateObject.BufferSize,
                             SocketFlags.None,
                             new AsyncCallback(ReceiveMessage), state);
                     }
                     else
                     {
                         // Not all data received. Get more.
-                        handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize,
+                        handler.BeginReceive(state.Buffer, ServerConstants.BufferOffset, StateObject.BufferSize,
                             SocketFlags.None,
                             new AsyncCallback(ReceiveMessage), state);
                     }
@@ -206,7 +215,7 @@ namespace Client
                 Console.WriteLine("Sent {0} bytes to server.", bytesSent);
                 
                 // Signal that all bytes have been sent.
-                sendDone.Set();
+                _sendDone.Set();
             }
             catch (Exception e)
             {
@@ -245,5 +254,40 @@ namespace Client
         }
 
         public abstract void HandleReceivePacket(Packet receivedPacket);
+
+        public Grid CreateBoard(GameBoard board)
+        {
+            Grid boardGrid = new Grid
+            {
+                Margin = new Thickness(30),
+                Background = Brushes.Beige
+            };
+
+            for (int i = 0; i < board.Width; i++)
+                boardGrid.ColumnDefinitions.Add(new ColumnDefinition());
+            for (int i = 0; i < board.Height; i++)
+                boardGrid.RowDefinitions.Add(new RowDefinition());
+
+            for (int i = 0; i < board.Width; i++)
+            {
+                for (int j = 0; j < board.Height; j++)
+                {
+                    Border border = new Border
+                    {
+                        BorderBrush = Brushes.Black,
+                        BorderThickness = new Thickness(1)
+                    };
+
+                    if (j < board.GoalAreaHeight || j >= (board.Height - board.GoalAreaHeight))
+                        border.BorderBrush = Brushes.DarkGray;
+
+                    Grid.SetColumn(border, i);
+                    Grid.SetRow(border, j);
+                    boardGrid.Children.Add(border);
+                }
+            }
+
+            return boardGrid;
+        }
     }
 }

@@ -48,7 +48,10 @@
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System" />
+   <Reference Include="PresentationCore" />
+   <Reference Include="PresentationFramework" />
+   <Reference Include="System" />
+   <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
@@ -69,6 +72,12 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Board\Board.csproj">
+      <Project>{8B6544C9-4BC0-4F7E-8229-FA86B23C2590}</Project>
+      <Name>Board</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

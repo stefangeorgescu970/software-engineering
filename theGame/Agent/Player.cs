@@ -5,6 +5,7 @@ using Server;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Board;
 using Newtonsoft.Json;
 
 namespace Agent
@@ -20,35 +21,36 @@ namespace Agent
         public List<int> PlayersIds { get; set; }
         public int NumberOfPlayers { get; set; }
     }
-    public class Board
-    {
-        public Board(int width, int height, int goalAreaHeight)
-        {
-            Width = width;
-            Height = height;
-            GoalAreaHeight = goalAreaHeight;
-        }
+    //public class Board
+    //{
+    //    public Board(int width, int height, int goalAreaHeight)
+    //    {
+    //        Width = width;
+    //        Height = height;
+    //        GoalAreaHeight = goalAreaHeight;
+    //    }
 
-        private int Width { get; set; }
-        private int Height { get; set; }
-        private int GoalAreaHeight { get; set; }
+    //    private int Width { get; set; }
+    //    private int Height { get; set; }
+    //    private int GoalAreaHeight { get; set; }
 
-    }
+    //}
 
     public class Player : Client.Client
     {
         public Team MyTeam;
         private Tuple<int, int> location;
-        private Board gameBoard;
+        //private Board gameBoard;
         private int teamLeaderId;
         private int gameMasterId;
 
-        public Player(Tuple<int, int> location, Board gameBoard)
+        public Player(Tuple<int, int> location, GameBoard gameBoard)
         {
             this.location = location;
-            this.gameBoard = gameBoard;
+            Board = CreateBoard(gameBoard);
             RegisterToServerAndGetId(ClientType.Agent);
             Console.WriteLine($"Player initialized");
+            Move();
         }
 
         /// <summary>
@@ -57,12 +59,13 @@ namespace Agent
         /// </summary>
         /// <returns></returns>
 
-        public Tuple<int, int> Move()   
+        public void Move()   
         {
             int []dx = {-1, 0, 1, 0};
             int []dy = {0, 1, 0, -1};
             Random r = new Random();
-            while (true)
+            int i = 1;
+            while (i == 1)
             {
                 int idx = r.Next(4);
                 int newX = location.Item1 + dx[idx];
@@ -71,7 +74,11 @@ namespace Agent
                 {
                     location = new Tuple<int, int>(newX, newY);
 
-                    return new Tuple<int, int>(newX, newY);
+                    Packet toSend = new Packet(Id, 2, RequestType.Send); //send to GM, plug in the id of GM
+
+                    toSend.AddArgument(ServerConstants.ArgumentNames.CheckMove, location);
+                    SendPacket(toSend);
+                    i++;
                 }
             }
         }
@@ -98,6 +105,12 @@ namespace Agent
                     gameMasterId = (int)receivedPacket.Arguments[ServerConstants.ArgumentNames.GameMasterId];
                     Console.WriteLine($"Player: {Id} received Game Master's id: {gameMasterId} ");
                     break;
+                case RequestType.GameBoardSize:
+                    var k = receivedPacket.Arguments[ServerConstants.ArgumentNames.GameBoardSize];
+                    Board = CreateBoard(new GameBoard((int)k.Width, (int)k.Height, (int)k.GoalAreaHeight)); //99% sure this won't work
+                    Console.WriteLine($"game board of size {k.Width}x{k.Height}x{k.GoalAreaHeight} added to {GetId()}");
+                    break;
+
                 default:
                     Console.WriteLine("Player received packet of unknown type, do nothing");
                     break;

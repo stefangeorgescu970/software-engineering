@@ -8,9 +8,9 @@ namespace Board
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public class gameBoard
+    public class GameBoard
     {
-        public gameBoard(int width, int height, int goalAreaHeight)
+        public GameBoard(int width, int height, int goalAreaHeight)
         {
             Width = width;
             Height = height;
@@ -26,16 +26,16 @@ namespace Board
     public partial class MainWindow
 	{
 		public int PlayerNumber { get; set; }
-        public gameBoard gameBoard;
+	    public GameBoard GameBoard;
         /// <summary>
         /// bool 2d array tells whether a cell is occupied by a player or not
         /// </summary>
-        public bool [,]occupied = new bool[40, 40];
+        public bool[,] Occupied = new bool[40, 40];
         /// <summary>
         /// bool 2d array tells whether a cell is has a piece or not
         /// </summary>
-        public bool[,] pieaces = new bool[40, 40];
-		public MainWindow(int numberOfPlayers, int goalAreaH, int boardW, int boardH)
+        public bool[,] Pieaces = new bool[40, 40];
+        public MainWindow(int numberOfPlayers, int goalAreaH, int boardW, int boardH)
 		{
 		    if (numberOfPlayers <= 0 )
 		        throw new ArgumentException("Number of players zero", nameof(numberOfPlayers));
@@ -47,8 +47,8 @@ namespace Board
 		        throw new ArgumentException("Board height zero", nameof(boardH));
 
             PlayerNumber = numberOfPlayers;
-            gameBoard = new gameBoard(boardW, boardH, goalAreaH);
-			InitializeComponent();
+		    GameBoard = new GameBoard(boardW, boardH, goalAreaH);
+            InitializeComponent();
             Content = CreateBoard();
         }
 
@@ -60,14 +60,14 @@ namespace Board
 				Background = Brushes.Beige
 			};
 
-			for (int i = 0; i < gameBoard.Width; i++)
-				boardGrid.ColumnDefinitions.Add(new ColumnDefinition());
-			for (int i = 0; i < gameBoard.Height; i++)
+	        for (int i = 0; i < GameBoard.Width; i++)
+                boardGrid.ColumnDefinitions.Add(new ColumnDefinition());
+			for (int i = 0; i < GameBoard.Height; i++)
 				boardGrid.RowDefinitions.Add(new RowDefinition());
 
-            for (int i = 0; i < gameBoard.Width; i++)
+            for (int i = 0; i < GameBoard.Width; i++)
             {
-                for (int j = 0; j < gameBoard.Height; j++)
+                for (int j = 0; j < GameBoard.Height; j++)
                 {
                     Border border = new Border
                     {
@@ -75,7 +75,7 @@ namespace Board
                         BorderThickness = new Thickness(1)
                     };
 
-                    if (j < gameBoard.GoalAreaHeight || j >= (gameBoard.Height - gameBoard.GoalAreaHeight))
+                    if (j < GameBoard.GoalAreaHeight || j >= (GameBoard.Height - GameBoard.GoalAreaHeight))
                         border.BorderBrush = Brushes.DarkGray;
 
                     Grid.SetColumn(border, i);
@@ -97,7 +97,7 @@ namespace Board
 	    /// <returns></returns>
 	    public bool IsOccupied(int i, int j)
 	    {
-	        return occupied[i, j];
+	        return Occupied[i, j];
 	    }
 	    /// <summary>
 	    /// check whether a cell has a piece or not
@@ -107,7 +107,7 @@ namespace Board
 	    /// <returns></returns>
 	    public bool IsPiece(int i, int j)
 	    {
-	        return pieaces[i, j];
+	        return Pieaces[i, j];
 	    }
 
     }

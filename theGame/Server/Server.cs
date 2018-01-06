@@ -15,13 +15,13 @@ namespace Server
     public class StateObject
     {
         // Client  socket.
-        public Socket workSocket = null;
+        public Socket WorkSocket = null;
         // Size of receive buffer.
         public const int BufferSize = ServerConstants.ServerBufferSize;
         // Receive buffer.
-        public byte[] buffer = new byte[BufferSize];
+        public byte[] Buffer = new byte[BufferSize];
         // Received data string.
-        public StringBuilder sb = new StringBuilder();
+        public StringBuilder Sb = new StringBuilder();
     }
 
 
@@ -30,7 +30,7 @@ namespace Server
         // TODO change this to singleton rather than using static fields.
         // TODO add method that converts from packet to bytearray.
 
-        public static ManualResetEvent allDone = new ManualResetEvent(false);
+        public static ManualResetEvent AllDone = new ManualResetEvent(false);
 
         /// <summary>
         /// The current available identifier for players.
@@ -40,7 +40,7 @@ namespace Server
         /// List of clients.
         /// </summary>
         private static readonly List<ClientData> MyClients = new List<ClientData>(); // Updated list of clients to serve
-        private static readonly Mutex myMutex = new Mutex();
+        private static readonly Mutex MyMutex = new Mutex();
 
         /// <summary>
         /// Setups the server.
@@ -67,12 +67,12 @@ namespace Server
 
                 while (true)
                 {
-                    allDone.Reset();
+                    AllDone.Reset();
 
                     Console.WriteLine("Waiting for connection...");
                     listener.BeginAccept(new AsyncCallback(AcceptConnection), listener);
 
-                    allDone.WaitOne();
+                    AllDone.WaitOne();
                 }
             }
             catch (Exception e)
@@ -96,7 +96,7 @@ namespace Server
             // Called when a new connection is established, with an async result.
 
             // Signal the main thread to continue.
-            allDone.Set();
+            AllDone.Set();
 
             // Get the socket that handles the client request.
             Socket listener = (Socket)asyncResult.AsyncState;
@@ -110,19 +110,18 @@ namespace Server
             Console.WriteLine("Client Connected!");
 
             // Create the state object.
-            StateObject state = new StateObject();
+            StateObject state = new StateObject {WorkSocket = handler};
 
-            state.workSocket = handler;
 
-            handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+            handler.BeginReceive(state.Buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
                 new AsyncCallback(ReceiveMessage), state);
 
             try
             {
-                allDone.Reset();
+                AllDone.Reset();
                 Console.WriteLine("Waiting for another connection...");
                 listener.BeginAccept(new AsyncCallback(AcceptConnection), listener);
-                allDone.WaitOne();
+                AllDone.WaitOne();
             }
             catch (Exception e)
             {
@@ -142,7 +141,7 @@ namespace Server
             // Retrieve the state object and the handler socket
             // from the asynchronous state object.
             StateObject state = (StateObject)asyncResult.AsyncState;
-            Socket handler = state.workSocket;
+            Socket handler = state.WorkSocket;
 
             // Read data from the client socket. 
             int bytesRead = handler.EndReceive(asyncResult);
@@ -151,13 +150,13 @@ namespace Server
             {
                 
                 // There  might be more data, so store the data received so far.
-                state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+                state.Sb.Append(Encoding.ASCII.GetString(state.Buffer, 0, bytesRead));
 
                 
 
                 // Check for end-of-file tag. If it is not there, read 
                 // more data.
-                content = state.sb.ToString();
+                content = state.Sb.ToString();
                 int eofIndex = content.IndexOf(ServerConstants.endOfPacket, StringComparison.Ordinal);
                 if (eofIndex > -1)
                 {
@@ -189,14 +188,14 @@ namespace Server
 
                     }
 
-                    state.sb.Clear();
+                    state.Sb.Clear();
                
-                    handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None, new AsyncCallback(ReceiveMessage), state);
+                    handler.BeginReceive(state.Buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None, new AsyncCallback(ReceiveMessage), state);
                 }
                 else
                 {
                     // Not all data received. Get more.
-                    handler.BeginReceive(state.buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
+                    handler.BeginReceive(state.Buffer, ServerConstants.BufferOffset, StateObject.BufferSize, SocketFlags.None,
                                          new AsyncCallback(ReceiveMessage), state);
                 }
             }
@@ -239,14 +238,14 @@ namespace Server
                 case ClientType.Agent:
                 {
 
-                        myMutex.WaitOne();
+                        MyMutex.WaitOne();
                         try
                         {
                             _currentAvailableIdForClients++;
                         }
                         finally
                         {
-                            myMutex.ReleaseMutex();
+                            MyMutex.ReleaseMutex();
                         }
 
 
@@ -266,14 +265,14 @@ namespace Server
                     }
                 case ClientType.GameMaster:
                     {
-                        myMutex.WaitOne();
+                        MyMutex.WaitOne();
                         try
                         {
                             _currentAvailableIdForClients++;
                         }
                         finally
                         {
-                            myMutex.ReleaseMutex();
+                            MyMutex.ReleaseMutex();
                         }
 
 

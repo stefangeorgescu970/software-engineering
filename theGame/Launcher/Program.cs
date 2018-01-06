@@ -1,12 +1,18 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Board;
 using Server;
 using Newtonsoft.Json;
-using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace Launcher
 {
@@ -19,12 +25,9 @@ namespace Launcher
     /// </summary>
     public class GameMaster : Client.Client
     {
-        /// <summary>
-        /// The board that game master see
-        /// </summary>
-        public MainWindow board { get; set; }
-
+       
         private List<int> PlayersList = new List<int>();
+
 
         public GameMaster(int maxNoOfPlayers)
         {
@@ -48,6 +51,18 @@ namespace Launcher
                     sendTeamLeaderId.AddArgument("TeamLeaderId", PlayersList[0]);
                     SendPacket(sendTeamLeaderId);
                     break;
+                case RequestType.CheckMove:
+                    JObject firstCoordinate = receivedPacket.Arguments.Values.First();
+                    JObject secondCoordinate = receivedPacket.Arguments.Values.Last();
+                    int frist = 0;
+                    Int32.TryParse(((JValue)firstCoordinate.First.Last).Value.ToString(), out frist);
+                    int destId = receivedPacket.Arguments[ServerConstants.ArgumentNames.Id];
+                    Packet response = new Packet(Id, destId, RequestType.Send);
+                    // return the status of the given cell
+                    //response.AddArgument(ServerConstants.ArgumentNames.Move, new Tuple<int, int>(firstCoordinate.));
+                    SendPacket(response);
+                    break;
+
                 default:
                     Console.WriteLine("Game Master received packet of unknown type, do nothing");
                     break;
@@ -70,6 +85,7 @@ namespace Launcher
     internal class Program
     {
         private static Application _app;
+        [STAThread]
         private static void Main()
         {
             int numberOfPlayers, goalAreaHeight, boardWidth, boardHeight;
@@ -78,9 +94,7 @@ namespace Launcher
 
             while (!int.TryParse(Console.ReadLine(), out numberOfPlayers) || !(numberOfPlayers > 0) )
                 Console.WriteLine("\t Please enter an integer");
-
-
-
+            
             Console.WriteLine("Board width:");
 
             while (!int.TryParse(Console.ReadLine(), out boardWidth) || !(boardWidth > 0))
@@ -112,8 +126,8 @@ namespace Launcher
             Packet toSend = new Packet(master.Id, master.Id, RequestType.Send);
             // toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, ClientType.GameMaster);
             master.SendPacket(toSend);
-
-
+            master.Board = master.CreateBoard(new GameBoard(boardWidth, boardHeight, goalAreaHeight));
+            
 
             Console.WriteLine("Press \"Enter\" to start client, \"Esc\" to close it");
             
@@ -140,7 +154,12 @@ namespace Launcher
                     try
                     {
                         DispatchToApp(() =>
-                            new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth, boardHeight).Show());
+                            {
+                                _app.MainWindow = new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth,
+                                    boardHeight);
+                                _app.MainWindow.Show();
+                            }
+                        );
                     }
                     catch (ArgumentException ex) when (ex.ParamName == "numberOfPlayers")
                     {
@@ -172,6 +191,21 @@ namespace Launcher
                     break;
                 }
             }
+
+            //_app.Dispatcher.Invoke(() =>
+            //{
+            //    Image myImage = new Image();
+            //    BitmapImage bi = new BitmapImage();
+            //    bi.BeginInit();
+            //    bi.UriSource = new Uri("Cat-icon.PNG", UriKind.Relative);
+            //    bi.EndInit();
+            //    myImage.Stretch = Stretch.Fill;
+            //    myImage.Source = bi;
+
+            //    Grid.SetColumn(myImage,2);
+            //    Grid.SetRow(myImage,2);
+            //    ((Grid) _app.MainWindow.Content).Children.Add(myImage);
+            //});
 
             Console.ReadKey();
         }

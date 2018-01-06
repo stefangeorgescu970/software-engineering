@@ -36,6 +36,9 @@
     <StartupObject>Agent.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Client">
+      <HintPath>..\Client\bin\Debug\Client.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -47,6 +50,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Player.cs" />
@@ -59,6 +63,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Board\Board.csproj">
+      <Project>{8B6544C9-4BC0-4F7E-8229-FA86B23C2590}</Project>
+      <Name>Board</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Client\Client.csproj">
       <Project>{1bdb29a4-b634-4f30-8ac1-3f4bcca60ce2}</Project>
       <Name>Client</Name>
