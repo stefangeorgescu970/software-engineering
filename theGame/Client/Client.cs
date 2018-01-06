@@ -231,11 +231,15 @@ namespace Client
             }
         }
 
-        public void RegisterToServerAndGetId(ClientType whoAmI)
+        public void RegisterToServerAndGetId(ClientType whoAmI, int numberOfSeats = 0)
         {
             Packet toSend = new Packet(Id, -1, RequestType.Register);
             
             toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, whoAmI);
+
+            if(ClientType.GameMaster == whoAmI) {
+                toSend.AddArgument("NumberOfPlayersForGame", numberOfSeats);
+            }
             
             SendPacket(toSend);
         }

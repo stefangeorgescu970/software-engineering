@@ -18,30 +18,14 @@ namespace Launcher
     /// </summary>
     public class GameMaster : Client.Client
     {
-
-        public class gameBoard
-        {
-            public gameBoard(int width, int height, int goalAreaHeight)
-            {
-                Width = width;
-                Height = height;
-                GoalAreaHeight = goalAreaHeight;
-            }
-
-            public int Width { get; set; }
-            public int Height { get; set; }
-            public int GoalAreaHeight { get; set; }
-
-        }
-
         /// <summary>
         /// The board that game master see
         /// </summary>
         public MainWindow board { get; set; }
        
-        public GameMaster()
+        public GameMaster(int maxNoOfPlayers)
         {
-            RegisterToServerAndGetId(ClientType.GameMaster);
+            RegisterToServerAndGetId(ClientType.GameMaster, maxNoOfPlayers); 
         }
         public override void HandleReceivePacket(Packet receivedPacket)
         {
@@ -53,15 +37,6 @@ namespace Launcher
             else
             {
                 Console.WriteLine("went to else!");
-
-                if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.GameBoardSize))
-                {
-                    var returnBoard = new Packet(GetId(), receivedPacket.SenderId, RequestType.Send);
-                    string p = JsonConvert.SerializeObject(new gameBoard(10, 10, 2));
-                    returnBoard.AddArgument(ServerConstants.ArgumentNames.GameBoardSize, new gameBoard(10, 10, 2));
-                    SendPacket(returnBoard);
-                }
-
                 //var value = receivedPacket.Arguments[ServerConstants.ArgumentNames.CheckMove];
                 //if (value != null)
                 //{
@@ -82,16 +57,6 @@ namespace Launcher
         private static Application _app;
         private static void Main()
         {
-            
-            // create the master
-            GameMaster master = new GameMaster();
-            // wait for master id to be assigned
-            while (master.Id == -1) ;
-            Console.WriteLine("master id " + master.Id + " is ready");
-            //Packet toSend = new Packet(master.Id, master.Id, RequestType.Send);
-            // toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, ClientType.GameMaster);
-            //master.SendPacket(toSend);    
-
             int numberOfPlayers, goalAreaHeight, boardWidth, boardHeight;
            
             Console.WriteLine("Number of players:");
@@ -124,9 +89,19 @@ namespace Launcher
                     Console.WriteLine("\t Please enter an integer");
             }
 
+            // create the master
+            GameMaster master = new GameMaster(numberOfPlayers);
+            // wait for master id to be assigned
+            while (master.Id == -1) ;
+            Console.WriteLine("master id " + master.Id + " is ready");
+            Packet toSend = new Packet(master.Id, master.Id, RequestType.Send);
+            // toSend.AddArgument(ServerConstants.ArgumentNames.SenderType, ClientType.GameMaster);
+            master.SendPacket(toSend);
+
+
 
             Console.WriteLine("Press \"Enter\" to start client, \"Esc\" to close it");
-
+            
             var appthread = new Thread(() =>
             {
                 _app = new Application
@@ -172,8 +147,7 @@ namespace Launcher
                         Console.WriteLine("Something wrong with board height");
                         return;
                     }
-
-                    GenerateTeamLeader(numberOfPlayers);
+                    
                 }
                 // Press Esc to exit
                 if (key == ConsoleKey.Escape)
@@ -187,20 +161,6 @@ namespace Launcher
             Console.ReadKey();
         }
 
-        private static void GenerateTeamLeader(int numberOfPlayers)
-        {
-            var p = new Process
-            {
-                StartInfo =
-                {
-                    Arguments =  $"0" + " " + $"{numberOfPlayers - 1}",
-                    FileName = @"..\..\..\Agent\bin\Debug\Agent.exe",
-                    CreateNoWindow = true,
-                    UseShellExecute = true
-                }
-            };
-            p.Start();
-        }
 
         private static void DispatchToApp(Action action)
         {

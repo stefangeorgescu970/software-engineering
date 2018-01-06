@@ -26,6 +26,10 @@ namespace Server
         /// </summary>
         private ConnectionType _myConnectionType;
 
+        private ClientType _clientType;
+
+        private int _numberOfSpotsAvailable;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Server.ClientData"/> class.
@@ -59,5 +63,10 @@ namespace Server
         /// </summary>
         /// <value>The type of the connection.</value>
         public ConnectionType ConnectionType { get { return _myConnectionType; } set  { _myConnectionType = value; } }
+
+        public ClientType ClientType { get => _clientType; set => _clientType = value; }
+
+        // Will be used just for game master
+        public int NumberOfSpotsAvailable { get => _numberOfSpotsAvailable; set => _numberOfSpotsAvailable = value; }
     }
 }
