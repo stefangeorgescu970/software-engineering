@@ -6,6 +6,7 @@ using System.Windows;
 using Board;
 using Server;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Launcher
 {
@@ -22,35 +23,49 @@ namespace Launcher
         /// The board that game master see
         /// </summary>
         public MainWindow board { get; set; }
-       
+
+        private List<int> PlayersList = new List<int>();
+
         public GameMaster(int maxNoOfPlayers)
         {
             RegisterToServerAndGetId(ClientType.GameMaster, maxNoOfPlayers); 
         }
         public override void HandleReceivePacket(Packet receivedPacket)
         {
-            if (receivedPacket.RequestType == RequestType.Register)
+            switch (receivedPacket.RequestType)
             {
-                SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
-                Console.WriteLine("id is set for game master : " + Id);
+                case RequestType.Register:
+                    SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
+                    Console.WriteLine("id is set for game master : " + Id);
+                    break;
+
+                case RequestType.Send:
+                    break;
+                case RequestType.ConnectToGame:
+                    var newPlayer = (int)receivedPacket.Arguments["NewPlayerId"];
+                    PlayersList.Add(newPlayer);
+                    var sendTeamLeaderId = new Packet(GetId(), newPlayer, RequestType.Send);
+                    sendTeamLeaderId.AddArgument("TeamLeaderId", PlayersList[0]);
+                    SendPacket(sendTeamLeaderId);
+                    break;
+                default:
+                    Console.WriteLine("Game Master received packet of unknown type, do nothing");
+                    break;
             }
-            else
-            {
-                Console.WriteLine("went to else!");
-                //var value = receivedPacket.Arguments[ServerConstants.ArgumentNames.CheckMove];
-                //if (value != null)
-                //{
-                //    Tuple<int, int> idx = value as Tuple<int, int>;
-                //    int destId = receivedPacket.Arguments[ServerConstants.ArgumentNames.Id];
-                //    Packet response = new Packet(Id, destId, RequestType.Send);
-                //    // return the status of the given cell
-                //    response.AddArgument(ServerConstants.ArgumentNames.Move, new Tuple<bool, bool>(board.IsOccupied(idx.Item1, idx.Item2), board.IsPiece(idx.Item1, idx.Item2)));
-                //    SendPacket(response);
-                //}
-                //TODO - handle something received from another entit
-            }
+
+            //var value = receivedPacket.Arguments[ServerConstants.ArgumentNames.CheckMove];
+            //if (value != null)
+            //{
+            //    Tuple<int, int> idx = value as Tuple<int, int>;
+            //    int destId = receivedPacket.Arguments[ServerConstants.ArgumentNames.Id];
+            //    Packet response = new Packet(Id, destId, RequestType.Send);
+            //    // return the status of the given cell
+            //    response.AddArgument(ServerConstants.ArgumentNames.Move, new Tuple<bool, bool>(board.IsOccupied(idx.Item1, idx.Item2), board.IsPiece(idx.Item1, idx.Item2)));
+            //    SendPacket(response);
+            //}
+            //TODO - handle something received from another entit
         }
-        
+
     }
     internal class Program
     {

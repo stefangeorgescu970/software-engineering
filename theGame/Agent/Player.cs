@@ -99,7 +99,7 @@ namespace Agent
                     Console.WriteLine($"Player: {Id} received Game Master's id: {gameMasterId} ");
                     break;
                 default:
-                    Console.WriteLine("Received packet of unknown type, do nothing");
+                    Console.WriteLine("Player received packet of unknown type, do nothing");
                     break;
             }
         }
