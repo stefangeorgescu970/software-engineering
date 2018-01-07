@@ -5,8 +5,15 @@ using Server;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
 using Board;
 using Newtonsoft.Json;
+using System.Windows.Media;
+using Client;
+using Newtonsoft.Json.Linq;
 
 namespace Agent
 {
@@ -21,36 +28,31 @@ namespace Agent
         public List<int> PlayersIds { get; set; }
         public int NumberOfPlayers { get; set; }
     }
-    //public class Board
-    //{
-    //    public Board(int width, int height, int goalAreaHeight)
-    //    {
-    //        Width = width;
-    //        Height = height;
-    //        GoalAreaHeight = goalAreaHeight;
-    //    }
-
-    //    private int Width { get; set; }
-    //    private int Height { get; set; }
-    //    private int GoalAreaHeight { get; set; }
-
-    //}
-
     public class Player : Client.Client
     {
         public Team MyTeam;
         private Tuple<int, int> location;
-        //private Board gameBoard;
         private int teamLeaderId;
         private int gameMasterId;
 
-        public Player(Tuple<int, int> location, GameBoard gameBoard)
+        public Player(Tuple<int, int> location)
         {
             this.location = location;
-            Board = CreateBoard(gameBoard);
+            
             RegisterToServerAndGetId(ClientType.Agent);
             Console.WriteLine($"Player initialized");
+            while (Id == -1 || gameMasterId == 0) ;
+            GetBoardDim();
+            while (Board == null) ;
+
+            System.Threading.Thread.Sleep(5000);
             Move();
+        }
+        public void GetBoardDim()
+        {
+            Packet boardRequest = new Packet(Id, gameMasterId,RequestType.Send);
+            boardRequest.AddArgument(ServerConstants.ArgumentNames.GameBoardSize, null);
+            SendPacket(boardRequest);
         }
 
         /// <summary>
@@ -64,25 +66,26 @@ namespace Agent
             int []dx = {-1, 0, 1, 0};
             int []dy = {0, 1, 0, -1};
             Random r = new Random();
+            
             int i = 1;
-            while (i == 1)
+            while (i < 2)
             {
                 int idx = r.Next(4);
                 int newX = location.Item1 + dx[idx];
                 int newY = location.Item2 + dy[idx];
                 if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10/* && (newX, newY) are not ocupied */ ) // 10 should subtituted by the board size
                 {
-                    location = new Tuple<int, int>(newX, newY);
+                    Tuple<int, int> testLocation = new Tuple<int, int>(newX, newY);
 
-                    Packet toSend = new Packet(Id, 2, RequestType.Send); //send to GM, plug in the id of GM
+                    Packet toSend = new Packet(Id, gameMasterId, RequestType.Send); //send to GM, plug in the id of GM
 
-                    toSend.AddArgument(ServerConstants.ArgumentNames.CheckMove, location);
+                    toSend.AddArgument(ServerConstants.ArgumentNames.CheckMove, testLocation);
                     SendPacket(toSend);
                     i++;
                 }
             }
         }
-
+        
         public override void HandleReceivePacket(Packet receivedPacket)
         {
             switch (receivedPacket.RequestType)
@@ -100,17 +103,25 @@ namespace Agent
                         teamLeaderId = (int)receivedPacket.Arguments["TeamLeaderId"];
                         Console.WriteLine($"Player: {Id} received Team Leader's id: {teamLeaderId} ");
                     }
+                    else if (receivedPacket.Arguments.ContainsKey("GameBoardSize") &&
+                             receivedPacket.SenderId == gameMasterId)
+                    {
+                        var k = receivedPacket.Arguments[ServerConstants.ArgumentNames.GameBoardSize];
+                        Board = new GameBoard((int) k.Width, (int) k.Height, (int) k.GoalAreaHeight);
+                        Console.WriteLine($"game board of size {k.Width}x{k.Height}x{k.GoalAreaHeight} added to {GetId()}");
+                    }
+                    else if (receivedPacket.Arguments.ContainsKey("CheckMove") && receivedPacket.SenderId == gameMasterId)
+                    {
+                        JObject firstCoordinate = receivedPacket.Arguments.Values.First();
+                        Int32.TryParse(((JValue)firstCoordinate.First.Last).Value.ToString(), out int frist);
+                        Int32.TryParse(((JValue)firstCoordinate.Last.Last).Value.ToString(), out int second);
+                        location = new Tuple<int, int>(frist,second);
+                    }
                     break;
                 case RequestType.ConnectToGame:
                     gameMasterId = (int)receivedPacket.Arguments[ServerConstants.ArgumentNames.GameMasterId];
                     Console.WriteLine($"Player: {Id} received Game Master's id: {gameMasterId} ");
                     break;
-                case RequestType.GameBoardSize:
-                    var k = receivedPacket.Arguments[ServerConstants.ArgumentNames.GameBoardSize];
-                    Board = CreateBoard(new GameBoard((int)k.Width, (int)k.Height, (int)k.GoalAreaHeight)); //99% sure this won't work
-                    Console.WriteLine($"game board of size {k.Width}x{k.Height}x{k.GoalAreaHeight} added to {GetId()}");
-                    break;
-
                 default:
                     Console.WriteLine("Player received packet of unknown type, do nothing");
                     break;

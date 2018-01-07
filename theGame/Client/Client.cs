@@ -27,10 +27,8 @@ namespace Client
         public StringBuilder Sb = new StringBuilder();
     }
 
-
     public abstract class Client
     {
-
         // ManualResetEvent instances signal completion.
         private static ManualResetEvent _connectDone = new ManualResetEvent(false);
         private static ManualResetEvent _sendDone = new ManualResetEvent(false);
@@ -43,10 +41,10 @@ namespace Client
         /// Baord of each individual client
         /// </summary>
 
-        public Grid Board = new Grid();
+        public GameBoard Board = new GameBoard();
 
         private Socket _mySocket;
-
+        
         protected Client()
         {
             TryConnect(ServerConstants.MaximumNumberOfAttemtps);
@@ -55,7 +53,6 @@ namespace Client
                 //TODO handle case when the client does not manage to esablish connection to server
                 _isConnected = false;
             }
-          
         }
 
         protected void SetId(int id)
@@ -66,10 +63,8 @@ namespace Client
         {
             return Id;
         }
-
         public void TryConnect(int maximumAttempts)
         {
-
             int attempts = 0;
             while (!_isConnected && attempts < maximumAttempts)
             {
@@ -92,7 +87,6 @@ namespace Client
                     _isConnected = true;
                     _mySocket = client;
 
-
                     // Create the state object.
                     StateObject state = new StateObject {WorkSocket = client};
 
@@ -106,7 +100,6 @@ namespace Client
                     Console.WriteLine("Connection Attempts: " + attempts);
                 }
             }
-
          //   Console.Clear();
             if (_isConnected)
                 Console.WriteLine("Connected");
@@ -133,7 +126,7 @@ namespace Client
                 Console.WriteLine(e.ToString());
             }
         }
-
+        
         private void ReceiveMessage(IAsyncResult asyncResult)
         {
             try
@@ -252,42 +245,6 @@ namespace Client
             
             SendPacket(toSend);
         }
-
         public abstract void HandleReceivePacket(Packet receivedPacket);
-
-        public Grid CreateBoard(GameBoard board)
-        {
-            Grid boardGrid = new Grid
-            {
-                Margin = new Thickness(30),
-                Background = Brushes.Beige
-            };
-
-            for (int i = 0; i < board.Width; i++)
-                boardGrid.ColumnDefinitions.Add(new ColumnDefinition());
-            for (int i = 0; i < board.Height; i++)
-                boardGrid.RowDefinitions.Add(new RowDefinition());
-
-            for (int i = 0; i < board.Width; i++)
-            {
-                for (int j = 0; j < board.Height; j++)
-                {
-                    Border border = new Border
-                    {
-                        BorderBrush = Brushes.Black,
-                        BorderThickness = new Thickness(1)
-                    };
-
-                    if (j < board.GoalAreaHeight || j >= (board.Height - board.GoalAreaHeight))
-                        border.BorderBrush = Brushes.DarkGray;
-
-                    Grid.SetColumn(border, i);
-                    Grid.SetRow(border, j);
-                    boardGrid.Children.Add(border);
-                }
-            }
-
-            return boardGrid;
-        }
     }
 }
