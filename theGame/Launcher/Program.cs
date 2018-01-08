@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Board;
 using Client;
 using Server;
@@ -27,11 +28,12 @@ namespace Launcher
     public class GameMaster : Client.Client
     {
         private List<int> PlayersList = new List<int>();
+        private List<Tuple<int,Tuple<int,int>>> PlayerLocations = new List<Tuple<int, Tuple<int, int>>>();
         public GameMaster(int maxNoOfPlayers)
         {
             RegisterToServerAndGetId(ClientType.GameMaster, maxNoOfPlayers);
         }
-        
+
         public override void HandleReceivePacket(Packet receivedPacket)
         {
             switch (receivedPacket.RequestType)
@@ -50,18 +52,34 @@ namespace Launcher
                     }
                     else if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.CheckMove))
                     {
-                        JObject firstCoordinate = receivedPacket.Arguments.Values.First();
-                        Int32.TryParse(((JValue)firstCoordinate.First.Last).Value.ToString(), out var frist);
-                        Int32.TryParse(((JValue)firstCoordinate.Last.Last).Value.ToString(), out var second);
+                        JObject testLocation = receivedPacket.Arguments.Values.First();
+                        Int32.TryParse(((JValue)testLocation.First.Last).Value.ToString(), out var testX);
+                        Int32.TryParse(((JValue)testLocation.Last.Last).Value.ToString(), out var testY);
 
                         int destId = receivedPacket.SenderId;
                         Packet response = new Packet(Id, destId, RequestType.Send);
-                        if (Board.IsOccupied(frist, second))
+                        if (Board.IsOccupied(testX, testY))
                             response.AddArgument(ServerConstants.ArgumentNames.CheckMove, null);
                         else
                         {
-                            response.AddArgument(ServerConstants.ArgumentNames.CheckMove, new Tuple<int, int>(frist,second));
-                            Board.Board[frist, second].Content = FieldContent.Player;
+                            //ugly, may be changed
+
+
+                            Tuple<int, int> currentLocation = PlayerLocations.First(i => i.Item1 == destId).Item2;
+                            response.AddArgument(ServerConstants.ArgumentNames.CheckMove, new Tuple<int, int>(testX, testY));
+                            Board.Board[testX, testY].Content = FieldContent.Player;
+                            Board.Board[currentLocation.Item1, currentLocation.Item2].Content = FieldContent.Empty;
+                            PlayerLocations.Remove(PlayerLocations.First(i => i.Item1 == destId));
+                            PlayerLocations.Add(new Tuple<int, Tuple<int, int>>(destId, new Tuple<int, int>(testX, testY)));
+
+
+                            Program.GameWindowApplication.Dispatcher.Invoke(() =>
+                            {
+                                Grid.SetColumn(((MainWindow)Program.GameWindowApplication.MainWindow).PlayerIcons[destId], testX);
+                                Grid.SetRow(((MainWindow)Program.GameWindowApplication.MainWindow).PlayerIcons[destId], testY);
+                                
+                                ((MainWindow)Program.GameWindowApplication.MainWindow).UpdateLayout();
+                            });
                         }
                         SendPacket(response);
                     }
@@ -72,6 +90,27 @@ namespace Launcher
                     var sendTeamLeaderId = new Packet(GetId(), newPlayer, RequestType.Send);
                     sendTeamLeaderId.AddArgument("TeamLeaderId", PlayersList[0]);
                     SendPacket(sendTeamLeaderId);
+                    Board.Board[1, 1].Content = FieldContent.Player;
+                    Board.Board[1, 1].PlayerID = newPlayer;
+                    PlayerLocations.Add(new Tuple<int, Tuple<int, int>>(newPlayer,new Tuple<int, int>(1,1)));
+
+                    Program.GameWindowApplication.Dispatcher.BeginInvoke(DispatcherPriority.Send, new Action(() =>
+                     {
+                         Image myImage = new Image();
+                         BitmapImage bi = new BitmapImage();
+                         bi.BeginInit();
+                         bi.UriSource = new Uri("Cat-icon.PNG", UriKind.Relative);
+                         bi.EndInit();
+                         myImage.Stretch = Stretch.Fill;
+                         myImage.Source = bi;
+
+                         Grid.SetColumn(myImage, 1);
+                         Grid.SetRow(myImage, 1);
+                         ((MainWindow)Program.GameWindowApplication.MainWindow).PlayerIcons.Add(newPlayer, myImage);
+                         ((Grid)Program.GameWindowApplication.MainWindow.Content).Children.Add(myImage);
+                         ((MainWindow)Program.GameWindowApplication.MainWindow).UpdateLayout();
+                     }));
+                    Console.WriteLine("poop");
                     break;
                 default:
                     Console.WriteLine("Game Master received packet of unknown type, do nothing");
@@ -80,9 +119,10 @@ namespace Launcher
             //TODO - handle something received from another entit
         }
     }
-    internal class Program
+    public class Program
     {
-        private static Application _app;
+        public static Application GameWindowApplication;
+        [STAThread]
         private static void Main()
         {
             int numberOfPlayers, goalAreaHeight, boardWidth, boardHeight;
@@ -115,6 +155,18 @@ namespace Launcher
                     Console.WriteLine("\t Please enter an integer");
             }
 
+            var appthread = new Thread(() =>
+            {
+                GameWindowApplication = new Application
+                {
+                    ShutdownMode = ShutdownMode.OnExplicitShutdown
+                };
+
+                GameWindowApplication.Run();
+            });
+            appthread.SetApartmentState(ApartmentState.STA);
+            appthread.Start();
+
             // create the master
             GameMaster master = new GameMaster(numberOfPlayers);
             // wait for master id to be assigned
@@ -127,17 +179,7 @@ namespace Launcher
 
             Console.WriteLine("Press \"Enter\" to start client, \"Esc\" to close it");
 
-            var appthread = new Thread(() =>
-            {
-                _app = new Application
-                {
-                    ShutdownMode = ShutdownMode.OnExplicitShutdown
-                };
 
-                _app.Run();
-            });
-            appthread.SetApartmentState(ApartmentState.STA);
-            appthread.Start();
 
             while (true)
             {
@@ -151,9 +193,7 @@ namespace Launcher
                     {
                         DispatchToApp(() =>
                             {
-                                _app.MainWindow = new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth,
-                                    boardHeight);
-                                _app.MainWindow.Show();
+                                new MainWindow(numberOfPlayers, goalAreaHeight, boardWidth, boardHeight).Show();
                             }
                         );
                     }
@@ -183,32 +223,17 @@ namespace Launcher
                 // Press Esc to exit
                 if (key == ConsoleKey.Escape)
                 {
-                    DispatchToApp(() => _app.Shutdown());
+                    DispatchToApp(() => GameWindowApplication.Shutdown());
                     Console.WriteLine("Client closed");
                     break;
                 }
             }
-
-            //_app.Dispatcher.Invoke(() =>
-            //{
-            //    Image myImage = new Image();
-            //    BitmapImage bi = new BitmapImage();
-            //    bi.BeginInit();
-            //    bi.UriSource = new Uri("Cat-icon.PNG", UriKind.Relative);
-            //    bi.EndInit();
-            //    myImage.Stretch = Stretch.Fill;
-            //    myImage.Source = bi;
-
-            //    Grid.SetColumn(myImage,2);
-            //    Grid.SetRow(myImage,2);
-            //    ((Grid) _app.MainWindow.Content).Children.Add(myImage);
-            //});
-
+           
             Console.ReadKey();
         }
         private static void DispatchToApp(Action action)
         {
-            _app.Dispatcher.Invoke(action);
+            GameWindowApplication.Dispatcher.Invoke(action);
         }
     }
 }

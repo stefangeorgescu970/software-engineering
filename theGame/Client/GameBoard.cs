@@ -13,6 +13,7 @@
     {
         public FieldContent Content { get; set; }
         public FieldType Type { get; set; }
+        public int PlayerID { get; set; }
 
         public Field()
         {

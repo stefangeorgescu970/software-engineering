@@ -38,7 +38,7 @@ namespace Agent
         public Player(Tuple<int, int> location)
         {
             this.location = location;
-            
+
             RegisterToServerAndGetId(ClientType.Agent);
             Console.WriteLine($"Player initialized");
             while (Id == -1 || gameMasterId == 0) ;
@@ -50,7 +50,7 @@ namespace Agent
         }
         public void GetBoardDim()
         {
-            Packet boardRequest = new Packet(Id, gameMasterId,RequestType.Send);
+            Packet boardRequest = new Packet(Id, gameMasterId, RequestType.Send);
             boardRequest.AddArgument(ServerConstants.ArgumentNames.GameBoardSize, null);
             SendPacket(boardRequest);
         }
@@ -61,31 +61,34 @@ namespace Agent
         /// </summary>
         /// <returns></returns>
 
-        public void Move()   
+        public void Move()
         {
-            int []dx = {-1, 0, 1, 0};
-            int []dy = {0, 1, 0, -1};
+            int[] dx = { -1, 0, 1, 0 };
+            int[] dy = { 0, 1, 0, -1 };
             Random r = new Random();
-            
-            int i = 1;
-            while (i < 2)
+
+            while (true)
             {
                 int idx = r.Next(4);
                 int newX = location.Item1 + dx[idx];
                 int newY = location.Item2 + dy[idx];
-                if (newX >= 0 && newX < 10 && newY >= 0 && newY < 10/* && (newX, newY) are not ocupied */ ) // 10 should subtituted by the board size
+                if (newX >= 0 && newX < Board.Width && newY >= 0 && newY < Board
+                    .Height)
                 {
                     Tuple<int, int> testLocation = new Tuple<int, int>(newX, newY);
 
-                    Packet toSend = new Packet(Id, gameMasterId, RequestType.Send); //send to GM, plug in the id of GM
+                    Packet toSend = new Packet(Id, gameMasterId, RequestType.Send);
+                    
+                    
 
                     toSend.AddArgument(ServerConstants.ArgumentNames.CheckMove, testLocation);
+                    
                     SendPacket(toSend);
-                    i++;
+                    Thread.Sleep(900);
                 }
             }
         }
-        
+
         public override void HandleReceivePacket(Packet receivedPacket)
         {
             switch (receivedPacket.RequestType)
@@ -107,15 +110,18 @@ namespace Agent
                              receivedPacket.SenderId == gameMasterId)
                     {
                         var k = receivedPacket.Arguments[ServerConstants.ArgumentNames.GameBoardSize];
-                        Board = new GameBoard((int) k.Width, (int) k.Height, (int) k.GoalAreaHeight);
+                        Board = new GameBoard((int)k.Width, (int)k.Height, (int)k.GoalAreaHeight);
                         Console.WriteLine($"game board of size {k.Width}x{k.Height}x{k.GoalAreaHeight} added to {GetId()}");
                     }
                     else if (receivedPacket.Arguments.ContainsKey("CheckMove") && receivedPacket.SenderId == gameMasterId)
                     {
                         JObject firstCoordinate = receivedPacket.Arguments.Values.First();
-                        Int32.TryParse(((JValue)firstCoordinate.First.Last).Value.ToString(), out int frist);
-                        Int32.TryParse(((JValue)firstCoordinate.Last.Last).Value.ToString(), out int second);
-                        location = new Tuple<int, int>(frist,second);
+                        if (firstCoordinate != null)
+                        {
+                            Int32.TryParse(((JValue)firstCoordinate.First.Last).Value.ToString(), out int frist);
+                            Int32.TryParse(((JValue)firstCoordinate.Last.Last).Value.ToString(), out int second);
+                            location = new Tuple<int, int>(frist, second);
+                        }
                     }
                     break;
                 case RequestType.ConnectToGame:
