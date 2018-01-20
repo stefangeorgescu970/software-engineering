@@ -40,7 +40,7 @@ namespace Launcher
             {
                 case RequestType.Register:
                     SetId(int.Parse(receivedPacket.Arguments[ServerConstants.ArgumentNames.Id]));
-                    Console.WriteLine("id is set for game master : " + Id);
+                    Console.WriteLine("ID is set for game master : " + Id);
                     break;
                 case RequestType.Send:
                     if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.GameBoardSize))
@@ -73,12 +73,12 @@ namespace Launcher
                             PlayerLocations.Add(new Tuple<int, Tuple<int, int>>(destId, new Tuple<int, int>(testX, testY)));
 
 
-                            Program.GameWindowApplication.Dispatcher.Invoke(() =>
+                            GameMstr.GameWindowApplication.Dispatcher.Invoke(() =>
                             {
-                                Grid.SetColumn(((MainWindow)Program.GameWindowApplication.MainWindow).PlayerIcons[destId], testX);
-                                Grid.SetRow(((MainWindow)Program.GameWindowApplication.MainWindow).PlayerIcons[destId], testY);
+                                Grid.SetColumn(((MainWindow)GameMstr.GameWindowApplication.MainWindow).PlayerIcons[destId], testX);
+                                Grid.SetRow(((MainWindow)GameMstr.GameWindowApplication.MainWindow).PlayerIcons[destId], testY);
                                 
-                                ((MainWindow)Program.GameWindowApplication.MainWindow).UpdateLayout();
+                                ((MainWindow)GameMstr.GameWindowApplication.MainWindow).UpdateLayout();
                             });
                         }
                         SendPacket(response);
@@ -94,7 +94,7 @@ namespace Launcher
                     Board.Board[1, 1].PlayerID = newPlayer;
                     PlayerLocations.Add(new Tuple<int, Tuple<int, int>>(newPlayer,new Tuple<int, int>(1,1)));
 
-                    Program.GameWindowApplication.Dispatcher.BeginInvoke(DispatcherPriority.Send, new Action(() =>
+                    GameMstr.GameWindowApplication.Dispatcher.BeginInvoke(DispatcherPriority.Send, new Action(() =>
                      {
                          Image myImage = new Image();
                          BitmapImage bi = new BitmapImage();
@@ -106,9 +106,9 @@ namespace Launcher
 
                          Grid.SetColumn(myImage, 1);
                          Grid.SetRow(myImage, 1);
-                         ((MainWindow)Program.GameWindowApplication.MainWindow).PlayerIcons.Add(newPlayer, myImage);
-                         ((Grid)Program.GameWindowApplication.MainWindow.Content).Children.Add(myImage);
-                         ((MainWindow)Program.GameWindowApplication.MainWindow).UpdateLayout();
+                         ((MainWindow)GameMstr.GameWindowApplication.MainWindow).PlayerIcons.Add(newPlayer, myImage);
+                         ((Grid)GameMstr.GameWindowApplication.MainWindow.Content).Children.Add(myImage);
+                         ((MainWindow)GameMstr.GameWindowApplication.MainWindow).UpdateLayout();
                      }));
                     Console.WriteLine("poop");
                     break;
@@ -119,7 +119,7 @@ namespace Launcher
             //TODO - handle something received from another entit
         }
     }
-    public class Program
+    public class GameMstr
     {
         public static Application GameWindowApplication;
         [STAThread]

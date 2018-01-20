@@ -141,7 +141,6 @@ namespace Client
                 StateObject state = (StateObject)asyncResult.AsyncState;
                 
                 Socket handler = state.WorkSocket;
-                Console.WriteLine("packet received step 1111111");
                 // Read data from the client socket. 
                 int bytesRead = handler.EndReceive(asyncResult);
 
@@ -154,7 +153,6 @@ namespace Client
                     // more data.
                     content = state.Sb.ToString();
                     int eofIndex = content.IndexOf(ServerConstants.endOfPacket, StringComparison.Ordinal);
-                    Console.WriteLine("packet received step 222222");
                     if (eofIndex > -1)
                     {
                         // All the data has been read from the 
@@ -164,7 +162,6 @@ namespace Client
                         
                         Packet receivedPacket = JsonConvert.DeserializeObject<Packet>(content.Remove(eofIndex));
                         HandleReceivePacket(receivedPacket);
-                        Console.WriteLine("packet received step 3333333");
                         state.Sb.Clear();
                         handler.BeginReceive(state.Buffer, ServerConstants.BufferOffset, StateObject.BufferSize,
                             SocketFlags.None,
