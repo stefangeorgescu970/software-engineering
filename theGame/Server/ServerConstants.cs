@@ -78,6 +78,14 @@ namespace Server
             /// The type to register player to team leader
             /// </summary>
             public const String RegisterToTeamLeader = "RegisterToTeamLeader";
+            /// <summary>
+            /// The type to exchange distance betwen players
+            /// </summary>
+            public const String ManhattanDistance = "ManhattanDistance";
+            /// <summary>
+            /// The type to indicate event of steppin on Item
+            /// </summary>
+            public const String SteppedOnItem = "SteppedOnItem";
             // Those who implement agent and game master are free to add here whatever tags they will use.
 
         }

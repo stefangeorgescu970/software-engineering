@@ -100,7 +100,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Cat-icon.png" />
+    <Resource Include="Resources\Cat-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\GoldItem.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

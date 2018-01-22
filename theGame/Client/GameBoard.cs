@@ -75,5 +75,14 @@
             else return true;
         }
 
+        public bool ContainsItem(int xCoordinate, int yCoordinate)
+        {
+            if (Board[xCoordinate, yCoordinate].Content.Equals(FieldContent.Item))
+            {
+                return true;
+            }
+            else return false;
+        }
+
     }
 }

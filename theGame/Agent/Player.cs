@@ -34,6 +34,7 @@ namespace Agent
         private Tuple<int, int> location;
         private int teamLeaderId;
         private int gameMasterId;
+        bool holdsItem = false;
 
         public Player(Tuple<int, int> location)
         {
@@ -79,12 +80,15 @@ namespace Agent
 
                     Packet toSend = new Packet(Id, gameMasterId, RequestType.Send);
                     
-                    
-
                     toSend.AddArgument(ServerConstants.ArgumentNames.CheckMove, testLocation);
                     
                     SendPacket(toSend);
-                    Thread.Sleep(900);
+                    Thread.Sleep(3000);
+
+                    toSend = new Packet(Id, gameMasterId, RequestType.Send);
+                    toSend.AddArgument(ServerConstants.ArgumentNames.ManhattanDistance, 0);
+                    SendPacket(toSend);
+                    Thread.Sleep(3000);
                 }
             }
         }
@@ -115,12 +119,24 @@ namespace Agent
                     }
                     else if (receivedPacket.Arguments.ContainsKey("CheckMove") && receivedPacket.SenderId == gameMasterId)
                     {
-                        JObject firstCoordinate = receivedPacket.Arguments.Values.First();
+                        var firstCoordinate = receivedPacket.Arguments[ServerConstants.ArgumentNames.CheckMove];
                         if (firstCoordinate != null)
                         {
-                            Int32.TryParse(((JValue)firstCoordinate.First.Last).Value.ToString(), out int frist);
-                            Int32.TryParse(((JValue)firstCoordinate.Last.Last).Value.ToString(), out int second);
-                            location = new Tuple<int, int>(frist, second);
+                            location = new Tuple<int, int>((int)firstCoordinate.Item1, (int)firstCoordinate.Item2);
+                            Console.WriteLine($"Player {GetId()} moves to location {firstCoordinate.Item1}x{firstCoordinate.Item2}");
+
+                        }
+                        if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.SteppedOnItem))
+                        {
+                                Console.WriteLine($"Player {GetId()} stepped on ITEM!");
+                            if (!holdsItem)
+                            {
+                                holdsItem = true;
+                                var pickItem = new Packet(GetId(), gameMasterId, RequestType.Send);
+                                pickItem.AddArgument(ServerConstants.ArgumentNames.SteppedOnItem, receivedPacket.Arguments[ServerConstants.ArgumentNames.SteppedOnItem]);
+                                SendPacket(pickItem);
+                                Console.WriteLine($"Player {GetId()} picks an ITEM!");
+                            }
                         }
                     }
                     break;

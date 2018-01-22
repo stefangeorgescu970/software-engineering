@@ -29,11 +29,15 @@ namespace Launcher
     {
         private List<int> PlayersList = new List<int>();
         private List<Tuple<int,Tuple<int,int>>> PlayerLocations = new List<Tuple<int, Tuple<int, int>>>();
-        public GameMaster(int maxNoOfPlayers)
+        private List<Tuple<int, Tuple<int, int>>> itemsLocations = new List<Tuple<int, Tuple<int, int>>>();
+
+        public List<Tuple<int, Tuple<int, int>>> ItemsLocations { get => itemsLocations; set => itemsLocations = value; }
+
+        public GameMaster(int maxNoOfPlayers, int numberOfItems, int goalAreaHeight, int boardWidth, int boardHeight)
         {
             RegisterToServerAndGetId(ClientType.GameMaster, maxNoOfPlayers);
         }
-
+        
         public override void HandleReceivePacket(Packet receivedPacket)
         {
             switch (receivedPacket.RequestType)
@@ -63,6 +67,11 @@ namespace Launcher
                         else
                         {
                             //ugly, may be changed
+                            if (Board.ContainsItem(testX, testY))
+                            {
+                                var item = ItemsLocations.Find(i => i.Item2.Item1 == testX && i.Item2.Item2 == testY);
+                                response.AddArgument(ServerConstants.ArgumentNames.SteppedOnItem, item.Item1);
+                            }
 
 
                             Tuple<int, int> currentLocation = PlayerLocations.First(i => i.Item1 == destId).Item2;
@@ -71,7 +80,6 @@ namespace Launcher
                             Board.Board[currentLocation.Item1, currentLocation.Item2].Content = FieldContent.Empty;
                             PlayerLocations.Remove(PlayerLocations.First(i => i.Item1 == destId));
                             PlayerLocations.Add(new Tuple<int, Tuple<int, int>>(destId, new Tuple<int, int>(testX, testY)));
-
 
                             GameMstr.GameWindowApplication.Dispatcher.Invoke(() =>
                             {
@@ -83,6 +91,27 @@ namespace Launcher
                         }
                         SendPacket(response);
                     }
+                    else if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.ManhattanDistance))
+                    {
+                        //by default return distance between sender and teamLeader
+                        int destId = receivedPacket.SenderId;
+                        var plLoc = PlayerLocations.Find(player => player.Item1 == destId);
+                        var distances = new List<Double>();
+
+                        foreach (var item in ItemsLocations)
+                            distances.Add(Math.Sqrt(Math.Pow((plLoc.Item2.Item1 - item.Item2.Item1), 2) + Math.Pow((plLoc.Item2.Item2 - item.Item2.Item2), 2)));
+
+                        Packet response = new Packet(Id, destId, RequestType.Send);
+                        response.AddArgument(ServerConstants.ArgumentNames.ManhattanDistance, distances.Min());
+                        SendPacket(response);
+                    }
+                    else if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.SteppedOnItem))
+                    {
+                        var itemId = (int)receivedPacket.Arguments[ServerConstants.ArgumentNames.SteppedOnItem];
+                        ItemsLocations.RemoveAll(item => item.Item1 == itemId);
+                        Console.WriteLine($"player {receivedPacket.SenderId} picked an item {itemId}");
+                    }
+
                     break;
                 case RequestType.ConnectToGame:
                     var newPlayer = (int)receivedPacket.Arguments["NewPlayerId"];
@@ -125,11 +154,16 @@ namespace Launcher
         [STAThread]
         private static void Main()
         {
-            int numberOfPlayers, goalAreaHeight, boardWidth, boardHeight;
+            int numberOfPlayers, goalAreaHeight, boardWidth, boardHeight, numberOfItems;
 
             Console.WriteLine("Number of players:");
 
             while (!int.TryParse(Console.ReadLine(), out numberOfPlayers) || !(numberOfPlayers > 0))
+                Console.WriteLine("\t Please enter an integer");
+
+            Console.WriteLine("Number of items:");
+
+            while (!int.TryParse(Console.ReadLine(), out numberOfItems) || !(numberOfItems > 0))
                 Console.WriteLine("\t Please enter an integer");
 
             Console.WriteLine("Board width:");
@@ -168,7 +202,7 @@ namespace Launcher
             appthread.Start();
 
             // create the master
-            GameMaster master = new GameMaster(numberOfPlayers);
+            GameMaster master = new GameMaster(numberOfPlayers, numberOfItems, goalAreaHeight, boardWidth, boardHeight);
             // wait for master id to be assigned
             while (master.Id == -1) ;
             Console.WriteLine("master id " + master.Id + " is ready");
@@ -217,7 +251,10 @@ namespace Launcher
                         Console.WriteLine("Something wrong with board height");
                         return;
                     }
+
+                    InitializeItems(numberOfItems, goalAreaHeight, boardWidth, boardHeight, master);
                     break;
+
 
                 }
                 // Press Esc to exit
@@ -231,6 +268,46 @@ namespace Launcher
            
             Console.ReadKey();
         }
+
+        public static void InitializeItems(int numberOfItems, int goalAreaHeight, int boardWidth, int boardHeight, GameMaster master)
+        {
+            Thread.Sleep(1000);
+            int j = 0;
+            Random r = new Random();
+            Tuple<int, int> loc = null;
+            for (int i = 0; i < numberOfItems; i++)
+            {
+                do
+                {
+                    loc = new Tuple<int, int>(r.Next(0, boardWidth), r.Next(goalAreaHeight, boardHeight));
+                }
+                while (master.ItemsLocations.Find(item => item.Item2 == loc) != null);
+
+                master.ItemsLocations.Add(new Tuple<int, Tuple<int, int>>(-i, loc));
+
+                master.Board.Board[loc.Item1, loc.Item2].Content = FieldContent.Item;
+                master.Board.Board[loc.Item1, loc.Item2].PlayerID = -i;
+
+                GameWindowApplication.Dispatcher.BeginInvoke(DispatcherPriority.Send, new Action(() =>
+                {
+                    var location = master.ItemsLocations[j++];
+                    Image myImage = new Image();
+                    BitmapImage bi = new BitmapImage();
+                    bi.BeginInit();
+                    bi.UriSource = new Uri("GoldItem.png", UriKind.Relative);
+                    bi.EndInit();
+                    myImage.Stretch = Stretch.Fill;
+                    myImage.Source = bi;
+
+                    Grid.SetColumn(myImage, location.Item2.Item1);
+                    Grid.SetRow(myImage, location.Item2.Item2);
+                    ((MainWindow)GameMstr.GameWindowApplication.MainWindow).ItemIcons.Add(location.Item1, myImage);
+                    ((Grid)GameMstr.GameWindowApplication.MainWindow.Content).Children.Add(myImage);
+                    ((MainWindow)GameMstr.GameWindowApplication.MainWindow).UpdateLayout();
+                }));
+            }
+        }
+
         private static void DispatchToApp(Action action)
         {
             GameWindowApplication.Dispatcher.Invoke(action);

@@ -18,6 +18,7 @@ namespace Board
         public int BoardHeight { get; set; }
 
         public Dictionary<int,Image> PlayerIcons = new Dictionary<int, Image>();
+        public Dictionary<int,Image> ItemIcons = new Dictionary<int, Image>();
 
         public MainWindow(int numberOfPlayers, int goalAreaH, int boardW, int boardH)
         {
