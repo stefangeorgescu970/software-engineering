@@ -88,7 +88,7 @@ namespace Agent
                     toSend = new Packet(Id, gameMasterId, RequestType.Send);
                     toSend.AddArgument(ServerConstants.ArgumentNames.ManhattanDistance, 0);
                     SendPacket(toSend);
-                    Thread.Sleep(3000);
+                    Thread.Sleep(800);
                 }
             }
         }
