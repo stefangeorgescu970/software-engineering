@@ -98,11 +98,19 @@ namespace Launcher
                         var plLoc = PlayerLocations.Find(player => player.Item1 == destId);
                         var distances = new List<Double>();
 
+                        //if player is in goal area on field not neighbouring any tasks area fields
+                        if(plLoc.Item2.Item2 < Board.GoalAreaHeight || plLoc.Item2.Item2 >Board.Height - Board.GoalAreaHeight) return;
+
                         foreach (var item in ItemsLocations)
+                        {
+                            //if item is in gola area: skip
+                            if (item.Item2.Item2 < Board.GoalAreaHeight || item.Item2.Item2 > Board.Height - Board.GoalAreaHeight) continue;
                             distances.Add(Math.Sqrt(Math.Pow((plLoc.Item2.Item1 - item.Item2.Item1), 2) + Math.Pow((plLoc.Item2.Item2 - item.Item2.Item2), 2)));
+                        }
 
                         Packet response = new Packet(Id, destId, RequestType.Send);
-                        response.AddArgument(ServerConstants.ArgumentNames.ManhattanDistance, distances.Min());
+                        var min = distances.Count > 0 ? distances.Min() : -1.0;
+                        response.AddArgument(ServerConstants.ArgumentNames.ManhattanDistance, min);
                         SendPacket(response);
                     }
                     else if (receivedPacket.Arguments.ContainsKey(ServerConstants.ArgumentNames.SteppedOnItem))
