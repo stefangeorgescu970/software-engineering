@@ -1,14 +1,5 @@
+
 # software-engineering
-Shared Git Repo for Software Engineering Project
+Shared Git Repo for Software Engineering Project - Warsaw University of Technology.
 
-A long time ago, in a galaxy far far away ...
-
-An ambitious group of students are starting the quest
-Of creating one badass app that their badass tutorial teacher
-Who owns a fucking e-pipe
-Would love.
-
-Can't believe you came to read this.
-Cya!
-
-Stefan
+The scope of the project was to create Clients that could communicate to a Game Server via a Messaging Service, all three entities being implemented by the team.
